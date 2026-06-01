@@ -1,0 +1,167 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  name      String?
+  password  String     // hashed or plain simple password for MVP
+  role      String     @default("USER") // USER, ADMIN
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  planType      String        @default("FREE") // "FREE" | "PREMIUM" | "AGENCY"
+  planExpiresAt DateTime?
+  agencyName    String?
+  agencyLogo    String?
+  agencyCode    String?       @unique // Unique code to share with agents
+  linkedAgencyId String?      // ID of the main agency owner account
+
+  emailVerified              Boolean   @default(false)
+  emailVerificationToken     String?   @unique
+  emailVerificationExpiresAt DateTime?
+
+  resetPasswordToken         String?   @unique
+  resetPasswordExpiresAt     DateTime?
+  
+  properties   Property[]
+  favorites    Favorite[]
+  reports      Report[]
+  transactions Transaction[]
+}
+
+model PhoneVerification {
+  id         String   @id @default(uuid())
+  phone      String   @unique
+  code       String
+  expiresAt  DateTime
+  attempts   Int      @default(0)
+  verified   Boolean  @default(false)
+  lastSentAt DateTime @default(now())
+}
+
+model EmailOtp {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  code       String
+  expiresAt  DateTime
+  attempts   Int      @default(0)
+  verified   Boolean  @default(false)
+  lastSentAt DateTime @default(now())
+}
+
+model Property {
+  id            String          @id @default(uuid())
+  userId        String
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type          String          // "buy" | "rent"
+  status        String          // "draft" | "pending" | "active" | "rejected" | "sold" | "rented" | "archived"
+  propertyType  String          // "house" | "apartment" | "lot" | "commercial" | "other"
+  title         String
+  slug          String          @unique
+  description   String
+  price         Float
+  currency      String          // "CRC" | "USD"
+  province      String          // "San José", "Alajuela", "Heredia", "Cartago", "Guanacaste", "Puntarenas", "Limón"
+  canton        String?
+  district      String?
+  bedrooms      Int
+  bathrooms     Int
+  parkingSpaces Int             @default(0)
+  areaM2        Float
+  petsAllowed   Boolean         @default(false)
+  furnished     Boolean         @default(false)
+  condominium   Boolean         @default(false)
+  featured      Boolean         @default(false)
+  featuredExpiresAt DateTime?   // Expiration of premium visibility
+  verified      Boolean         @default(false)
+  contactPhone  String
+  whatsapp      String
+  latitude      Float?
+  longitude     Float?
+  features      String          @default("[]")
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  images        PropertyImage[]
+  favorites     Favorite[]
+  reports       Report[]
+  fingerprints  PropertyFingerprint[]
+}
+
+model PropertyImage {
+  id         String   @id @default(uuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  url        String
+  phash      String?  // Perceptual image hash
+  createdAt  DateTime @default(now())
+}
+
+model Favorite {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, propertyId])
+}
+
+model Report {
+  id         String   @id @default(uuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  reason     String
+  details    String?
+  status     String   @default("pending") // "pending" | "resolved" | "dismissed"
+  createdAt  DateTime @default(now())
+}
+
+model PropertyFingerprint {
+  id          String   @id @default(uuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  titleNorm   String   // Normalised lowercase title
+  descNorm    String   // Normalised lowercase description
+  price       Float
+  imagesHash  String   // Combined hash of all images
+  createdAt   DateTime @default(now())
+}
+
+model Metric {
+  id        String   @id @default(uuid())
+  event     String   // "whatsapp_click", "otp_sent", "otp_verified", "listing_created", "listing_active", "listing_rejected", "listing_duplicate_flagged", "view"
+  propertyId String?
+  value     String?  // Additional context
+  createdAt DateTime @default(now())
+}
+
+model Transaction {
+  id            String    @id @default(uuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  amount        Float
+  type          String    // "featured_listing" | "premium_plan" | "agency_plan"
+  referenceId   String?   // ID de la propiedad (si aplica)
+  durationDays  Int?      // 7, 15 o 30 días (para destaques)
+  
+  paymentMethod String    @default("SINPE")       // SINPE o transferencia
+  receiptUrl    String    // Imagen del comprobante (Base64 optimizada o path)
+  status        String    @default("pending")     // "pending" | "approved" | "rejected"
+  notes         String?   // Razón de rechazo de la transacción
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
