@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title: 'TicoHabitat | Propiedades en Costa Rica (Alquiler y Venta)',
   description: 'La plataforma inmobiliaria más rápida y confiable de Costa Rica. Encuentra y publica casas, apartamentos y lotes sin spam ni duplicados.',
   metadataBase: new URL('https://ticohabitat.com'),
+  manifest: '/manifest.json',
   alternates: {
     canonical: '/',
   },
@@ -49,6 +50,22 @@ export default function RootLayout({
           <ToastContainer />
           <SearchAssistantBubble />
         </AppProvider>
+
+        {/* PWA Service Worker Registration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(
+                    function(reg) { console.log('TicoHabitat PWA ServiceWorker registered with scope:', reg.scope); },
+                    function(err) { console.error('TicoHabitat PWA ServiceWorker registration failed:', err); }
+                  );
+                });
+              }
+            `
+          }}
+        />
       </body>
     </html>
   );
