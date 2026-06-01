@@ -38,37 +38,19 @@ const PROVINCES = [
 ];
 
 export default async function AlquilarIndex() {
-  // Query dynamic rotated featured properties for carousel hydration
-  let featuredItems: any[] = [];
-  let featuredTotal = 0;
-  try {
-    const result = await getRandomFeaturedPropertiesAction('rent', 3);
-    featuredItems = result.items;
-    featuredTotal = result.totalCount;
-  } catch (err) {
-    console.error('Failed to fetch renting featured properties, falling back to empty list:', err);
-  }
+  // Run all data fetching in parallel for maximum speed
+  const [featuredResult, ...countResults] = await Promise.all([
+    getRandomFeaturedPropertiesAction('rent', 3).catch(() => ({ items: [], totalCount: 0 })),
+    ...PROVINCES.map((prov) =>
+      process.env.DATABASE_URL
+        ? db.property.count({ where: { province: prov.name, status: 'active', type: 'rent' } }).catch(() => 0)
+        : Promise.resolve(0)
+    ),
+  ]);
 
-  // Query real active listing counts per province, filtered by type='rent'
-  const provinceCounts = await Promise.all(
-    PROVINCES.map(async (prov) => {
-      let count = 0;
-      try {
-        if (process.env.DATABASE_URL) {
-          count = await db.property.count({
-            where: {
-              province: prov.name,
-              status: 'active',
-              type: 'rent',
-            },
-          });
-        }
-      } catch (err) {
-        // Fallback to 0 if database connection fails
-      }
-      return { ...prov, count };
-    })
-  );
+  const featuredItems = featuredResult.items as any[];
+  const featuredTotal = featuredResult.totalCount;
+  const provinceCounts = PROVINCES.map((prov, i) => ({ ...prov, count: countResults[i] as number }));
 
   return (
     <div className="flex-grow bg-stone-50/20 dark:bg-stone-950/20 py-16">

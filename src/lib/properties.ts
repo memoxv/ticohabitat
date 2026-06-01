@@ -110,7 +110,7 @@ export async function runAutoExpirationSweep() {
 export async function getProperties(filters: PropertyFilters) {
   // Ensure database is seeded with mock data if empty
   await checkAndSeedDatabase();
-  await runAutoExpirationSweep();
+  runAutoExpirationSweep(); // Fire-and-forget: don't block page rendering
 
   const {
     type,
@@ -252,7 +252,7 @@ export async function getProperties(filters: PropertyFilters) {
 
 export async function getPropertyBySlug(slug: string) {
   await checkAndSeedDatabase();
-  await runAutoExpirationSweep();
+  runAutoExpirationSweep(); // Fire-and-forget: don't block page rendering
 
   return await db.property.findUnique({
     where: { slug },
@@ -298,7 +298,7 @@ export async function getSimilarProperties(propertyId: string, limit = 3) {
 
 export async function getUserProperties(userId: string) {
   await checkAndSeedDatabase();
-  await runAutoExpirationSweep();
+  runAutoExpirationSweep(); // Fire-and-forget: don't block page rendering
 
   return await db.property.findMany({
     where: { userId },
@@ -313,7 +313,7 @@ export async function getUserProperties(userId: string) {
 
 export async function getAdminProperties() {
   await checkAndSeedDatabase();
-  await runAutoExpirationSweep();
+  runAutoExpirationSweep(); // Fire-and-forget: don't block page rendering
 
   return await db.property.findMany({
     include: {
@@ -546,7 +546,7 @@ export async function getFeaturedCountAction(type?: 'buy' | 'rent'): Promise<num
  * Returns an initial batch + total count for carousel hydration.
  */
 export async function getRandomFeaturedPropertiesAction(type?: 'buy' | 'rent', limit = 3) {
-  await runAutoExpirationSweep();
+  runAutoExpirationSweep(); // Fire-and-forget: don't block featured query
 
   try {
     if (!process.env.DATABASE_URL) {

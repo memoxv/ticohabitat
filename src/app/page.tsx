@@ -18,28 +18,19 @@ const PROVINCES = [
 ];
 
 export default async function Home() {
-  // Fetch dynamic rotated featured properties for carousel hydration (initial batch + total count)
-  const { items: featuredItems, totalCount: featuredTotal } = await getRandomFeaturedPropertiesAction(undefined, 3);
+  // Run all data fetching in parallel for maximum speed
+  const [featuredResult, ...countResults] = await Promise.all([
+    getRandomFeaturedPropertiesAction(undefined, 3),
+    ...PROVINCES.map((prov) =>
+      process.env.DATABASE_URL
+        ? db.property.count({ where: { province: prov.name, status: 'active' } }).catch(() => 0)
+        : Promise.resolve(0)
+    ),
+  ]);
 
-  // Query actual active listing counts for each province dynamically from the database
-  const provinceCounts = await Promise.all(
-    PROVINCES.map(async (prov) => {
-      let count = 0;
-      try {
-        if (process.env.DATABASE_URL) {
-          count = await db.property.count({
-            where: {
-              province: prov.name,
-              status: 'active',
-            },
-          });
-        }
-      } catch (err) {
-        // Fallback to 0 if database connection fails
-      }
-      return { ...prov, count };
-    })
-  );
+  const featuredItems = featuredResult.items;
+  const featuredTotal = featuredResult.totalCount;
+  const provinceCounts = PROVINCES.map((prov, i) => ({ ...prov, count: countResults[i] as number }));
 
   return (
     <div className="flex flex-col min-h-screen bg-stone-50/20 dark:bg-stone-950/20 transition-colors duration-150">
