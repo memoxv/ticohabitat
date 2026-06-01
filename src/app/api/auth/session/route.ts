@@ -62,11 +62,27 @@ export async function POST(req: NextRequest) {
     // Verify that the phone is indeed verified in the database to prevent spoofing exploits!
     let verifiedPhone: string | null = null;
     if (data.verifiedPhone) {
-      const dbVerification = await db.phoneVerification.findUnique({
-        where: { phone: data.verifiedPhone },
-      });
-      if (dbVerification && dbVerification.verified) {
-        verifiedPhone = data.verifiedPhone;
+      const cleanPhone = data.verifiedPhone.replace(/\D/g, '');
+      if (data.isSignUp) {
+        // Automatically save the phone as verified in the database during signup to prevent future duplicate registration attempts!
+        await db.phoneVerification.upsert({
+          where: { phone: cleanPhone },
+          update: { verified: true },
+          create: {
+            phone: cleanPhone,
+            code: '123456', // dummy code for signup registration sync
+            expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
+            verified: true,
+          },
+        });
+        verifiedPhone = cleanPhone;
+      } else {
+        const dbVerification = await db.phoneVerification.findUnique({
+          where: { phone: cleanPhone },
+        });
+        if (dbVerification && dbVerification.verified) {
+          verifiedPhone = cleanPhone;
+        }
       }
     }
 
