@@ -240,7 +240,11 @@ export async function createPropertyAction(data: PropertySubmitData) {
     };
   } catch (error) {
     console.error('Error in createPropertyAction:', error);
-    return { success: false, message: 'Ocurrió un error al crear el anuncio inmobiliario.' };
+    const details = error instanceof Error ? error.message : String(error);
+    return { 
+      success: false, 
+      message: `Error al publicar la propiedad: ${details}` 
+    };
   }
 }
 
@@ -607,7 +611,11 @@ export async function updatePropertyAction(propertyId: string, data: PropertySub
     return { success: true, message: '¡Tu anuncio ha sido actualizado con éxito!' };
   } catch (error) {
     console.error('Error in updatePropertyAction:', error);
-    return { success: false, message: 'Error interno al intentar guardar los cambios.' };
+    const details = error instanceof Error ? error.message : String(error);
+    return { 
+      success: false, 
+      message: `Error al actualizar la propiedad: ${details}` 
+    };
   }
 }
 
