@@ -21,10 +21,20 @@ export interface PropertyFilters {
   features?: string;
 }
 
+let lastSweepTime = 0;
+const SWEEP_THROTTLE_MS = 5 * 60 * 1000; // 5 minutes
+
 export async function runAutoExpirationSweep() {
   if (!process.env.DATABASE_URL) {
     return; // Skip if database is not configured
   }
+
+  const now = Date.now();
+  if (now - lastSweepTime < SWEEP_THROTTLE_MS) {
+    return; // Skip sweep if run recently to avoid connection and database saturation
+  }
+
+  lastSweepTime = now;
 
   try {
     // Auto-expire featured listings on query
