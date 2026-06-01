@@ -192,7 +192,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return mockUser;
   };
 
-  const logout = () => {
+  const logout = async () => {
     setUser(null);
     setPhoneVerified(null);
     localStorage.removeItem('user_session');
@@ -201,8 +201,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setFavorites([]);
     localStorage.removeItem('favorites');
     
-    // Call server session cookie destroyer
-    fetch('/api/auth/session', { method: 'DELETE' }).catch(console.error);
+    // Destroy server session cookie BEFORE redirecting (must complete to avoid restore race)
+    try {
+      await fetch('/api/auth/session', { method: 'DELETE' });
+    } catch (e) {
+      console.error('Failed to destroy server session:', e);
+    }
 
     showToast('Sesión cerrada correctamente', 'info');
     
