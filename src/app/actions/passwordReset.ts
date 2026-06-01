@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { EmailService } from '@/lib/emailService';
 import { hashPassword } from '@/lib/auth';
 import crypto from 'crypto';
+import { getAbsoluteAppUrl } from '@/lib/url';
 
 export interface PasswordResetResult {
   success: boolean;
@@ -46,7 +47,7 @@ export async function requestPasswordResetAction(email: string): Promise<Passwor
       },
     });
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001';
+    const appUrl = await getAbsoluteAppUrl();
     const resetLink = `${appUrl}/restablecer?token=${token}`;
 
     // Generate responsive HTML template

@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { getSession, setSession } from '@/lib/session';
 import { EmailService } from '@/lib/emailService';
 import crypto from 'crypto';
+import { getAbsoluteAppUrl } from '@/lib/url';
 
 export interface EmailVerificationResult {
   success: boolean;
@@ -34,7 +35,7 @@ export async function sendEmailVerification(): Promise<EmailVerificationResult> 
       },
     });
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001';
+    const appUrl = await getAbsoluteAppUrl();
     const verificationLink = `${appUrl}/verify-email?token=${token}`;
 
     // Generate responsive HTML template
