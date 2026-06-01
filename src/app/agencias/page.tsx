@@ -51,32 +51,64 @@ export default async function AgenciasPage({ searchParams }: AgenciasPageProps) 
     },
   });
 
-  // Enrich agencies with counts (number of agents + cumulative active listings)
-  const enrichedAgencies = await Promise.all(
-    agencies.map(async (owner) => {
-      // Find linked agents
-      const agents = await db.user.findMany({
-        where: { linkedAgencyId: owner.id },
-        select: { id: true },
-      });
+  // 1. Fetch all linked agents for all agencies in a single query
+  const agencyIds = agencies.map((a) => a.id);
+  const allLinkedAgents = agencyIds.length > 0
+    ? await db.user.findMany({
+        where: { linkedAgencyId: { in: agencyIds } },
+        select: { id: true, linkedAgencyId: true },
+      })
+    : [];
 
-      const userIds = [owner.id, ...agents.map((a) => a.id)];
+  // Group agent IDs by agency owner ID
+  const agencyAgentsMap: Record<string, string[]> = {};
+  agencies.forEach((a) => {
+    agencyAgentsMap[a.id] = [];
+  });
+  allLinkedAgents.forEach((agent) => {
+    if (agent.linkedAgencyId && agencyAgentsMap[agent.linkedAgencyId]) {
+      agencyAgentsMap[agent.linkedAgencyId].push(agent.id);
+    }
+  });
 
-      // Count active properties of the entire team
-      const activeListingsCount = await db.property.count({
+  // Collect all user IDs involved (owners + agents)
+  const allTeamUserIds = [...agencyIds, ...allLinkedAgents.map((a) => a.id)];
+
+  // 2. Fetch active property counts grouped by userId in a single query
+  const activeListingsGrouped = allTeamUserIds.length > 0
+    ? await db.property.groupBy({
+        by: ['userId'],
         where: {
-          userId: { in: userIds },
+          userId: { in: allTeamUserIds },
           status: 'active',
         },
-      });
+        _count: {
+          id: true,
+        },
+      })
+    : [];
 
-      return {
-        ...owner,
-        agentsCount: agents.length,
-        activeListingsCount,
-      };
-    })
-  );
+  // Convert to quick count lookup map
+  const userPropertyCountMap: Record<string, number> = {};
+  activeListingsGrouped.forEach((group) => {
+    userPropertyCountMap[group.userId] = group._count.id;
+  });
+
+  // 3. Assemble enriched agencies efficiently in-memory
+  const enrichedAgencies = agencies.map((owner) => {
+    const agents = agencyAgentsMap[owner.id] || [];
+    const teamIds = [owner.id, ...agents];
+    const activeListingsCount = teamIds.reduce(
+      (sum, uid) => sum + (userPropertyCountMap[uid] || 0),
+      0
+    );
+
+    return {
+      ...owner,
+      agentsCount: agents.length,
+      activeListingsCount,
+    };
+  });
 
   return (
     <div className="flex-grow bg-stone-50/20 dark:bg-stone-950/20 py-16">

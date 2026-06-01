@@ -15,39 +15,51 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  // Query latest user details from DB to get current planType
-  const dbUser = await db.user.findUnique({
-    where: { id: session.userId },
-    select: {
-      planType: true,
-      planExpiresAt: true,
-      agencyName: true,
-      role: true,
-      email: true,
-      name: true,
-      emailVerified: true,
-    },
-  });
+  // Fetch independent user details, effective plan, properties, and pending transactions in parallel
+  const [dbUser, effectivePlan, properties, pendingFeaturedTxs] = await Promise.all([
+    db.user.findUnique({
+      where: { id: session.userId },
+      select: {
+        planType: true,
+        planExpiresAt: true,
+        agencyName: true,
+        role: true,
+        email: true,
+        name: true,
+        emailVerified: true,
+      },
+    }),
+    getUserEffectivePlan(session.userId),
+    getUserProperties(session.userId),
+    db.transaction.findMany({
+      where: {
+        userId: session.userId,
+        type: 'featured_listing',
+        status: 'pending',
+      },
+      select: {
+        referenceId: true,
+      },
+    }),
+  ]);
 
   if (!dbUser) {
     redirect('/login');
   }
 
-  const effectivePlan = await getUserEffectivePlan(session.userId);
-
-  // Fetch properties uploaded by this specific user
-  const properties = await getUserProperties(session.userId);
   const propertyIds = properties.map((p) => p.id);
 
-  // Group metrics by propertyId and event type
-  const metrics = await db.metric.groupBy({
-    by: ['propertyId', 'event'],
-    where: {
-      propertyId: { in: propertyIds },
-      event: { in: ['view', 'whatsapp_click'] },
-    },
-    _count: true,
-  });
+  // Group metrics by propertyId and event type (only query if they have properties)
+  const metrics = propertyIds.length > 0
+    ? await db.metric.groupBy({
+        by: ['propertyId', 'event'],
+        where: {
+          propertyId: { in: propertyIds },
+          event: { in: ['view', 'whatsapp_click'] },
+        },
+        _count: true,
+      })
+    : [];
 
   // Convert to a quick lookup map
   const metricsMap: Record<string, { views: number; whatsappClicks: number }> = {};
@@ -63,18 +75,6 @@ export default async function DashboardPage() {
         metricsMap[m.propertyId].whatsappClicks = m._count;
       }
     }
-  });
-
-  // Fetch all pending featured transactions for this user
-  const pendingFeaturedTxs = await db.transaction.findMany({
-    where: {
-      userId: session.userId,
-      type: 'featured_listing',
-      status: 'pending',
-    },
-    select: {
-      referenceId: true,
-    },
   });
 
   const pendingIds = new Set(pendingFeaturedTxs.map((t) => t.referenceId).filter(Boolean) as string[]);

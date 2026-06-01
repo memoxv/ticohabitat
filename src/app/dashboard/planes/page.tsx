@@ -11,29 +11,29 @@ export default async function PlanesPage() {
     redirect('/login');
   }
 
-  // Get current user plan status from DB
-  const dbUser = await db.user.findUnique({
-    where: { id: session.userId },
-    select: {
-      planType: true,
-      planExpiresAt: true,
-      agencyName: true,
-      agencyLogo: true,
-    },
-  });
+  // Fetch user profile and transaction history in parallel to speed up page load
+  const [dbUser, transactions] = await Promise.all([
+    db.user.findUnique({
+      where: { id: session.userId },
+      select: {
+        planType: true,
+        planExpiresAt: true,
+        agencyName: true,
+        agencyLogo: true,
+      },
+    }),
+    db.transaction.findMany({
+      where: {
+        userId: session.userId,
+        type: { in: ['premium_plan', 'agency_plan'] },
+      },
+      orderBy: { createdAt: 'desc' },
+    }),
+  ]);
 
   if (!dbUser) {
     redirect('/login');
   }
-
-  // Get user transaction history
-  const transactions = await db.transaction.findMany({
-    where: {
-      userId: session.userId,
-      type: { in: ['premium_plan', 'agency_plan'] },
-    },
-    orderBy: { createdAt: 'desc' },
-  });
 
   return (
     <div className="flex-grow bg-slate-50/50 dark:bg-slate-900/10 py-10">
