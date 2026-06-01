@@ -8,6 +8,7 @@ import { revalidatePath } from 'next/cache';
 import { validateFeaturesForType } from '@/lib/attributes';
 import { generateSecureRandomHash } from '@/lib/auth';
 import { getUserEffectivePlan } from '@/lib/planInheritance';
+import { logSystemError } from '@/lib/logger';
 
 export interface PropertySubmitData {
   type: 'buy' | 'rent';
@@ -239,12 +240,13 @@ export async function createPropertyAction(data: PropertySubmitData) {
         : 'Tu propiedad ha sido publicada y ya está activa en la plataforma.',
     };
   } catch (error) {
-    console.error('Error in createPropertyAction:', error);
-    const details = error instanceof Error ? error.message : String(error);
-    return { 
-      success: false, 
-      message: `Error al publicar la propiedad: ${details}` 
-    };
+    // Log detailed trace securely to the system database log (bitácora)
+    await logSystemError('createPropertyAction', error, {
+      userId: session.userId,
+      title: data.title,
+      contactPhone: data.contactPhone,
+    });
+    return { success: false, message: 'Ocurrió un error al crear el anuncio inmobiliario.' };
   }
 }
 
@@ -610,12 +612,13 @@ export async function updatePropertyAction(propertyId: string, data: PropertySub
 
     return { success: true, message: '¡Tu anuncio ha sido actualizado con éxito!' };
   } catch (error) {
-    console.error('Error in updatePropertyAction:', error);
-    const details = error instanceof Error ? error.message : String(error);
-    return { 
-      success: false, 
-      message: `Error al actualizar la propiedad: ${details}` 
-    };
+    // Log detailed trace securely to the system database log (bitácora)
+    await logSystemError('updatePropertyAction', error, {
+      userId: session.userId,
+      propertyId,
+      title: data.title,
+    });
+    return { success: false, message: 'Error interno al intentar guardar los cambios.' };
   }
 }
 
