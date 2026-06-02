@@ -43,18 +43,41 @@ export default function PublicarPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState<PropertySubmitData>({
+  interface PublicarFormState {
+    type: 'buy' | 'rent';
+    propertyType: 'house' | 'apartment' | 'lot' | 'commercial' | 'quinta' | 'beach' | 'other';
+    title: string;
+    description: string;
+    price: number | '';
+    currency: 'CRC' | 'USD';
+    province: 'San José' | 'Alajuela' | 'Heredia' | 'Cartago' | 'Guanacaste' | 'Puntarenas' | 'Limón';
+    canton?: string;
+    district?: string;
+    bedrooms: number | '';
+    bathrooms: number | '';
+    parkingSpaces: number | '';
+    areaM2: number | '';
+    petsAllowed: boolean;
+    furnished: boolean;
+    condominium: boolean;
+    contactPhone: string;
+    whatsapp: string;
+    imageUrls: string[];
+    features?: string[];
+  }
+
+  const [formData, setFormData] = useState<PublicarFormState>({
     type: 'rent',
     propertyType: 'house',
     title: '',
     description: '',
-    price: 0,
+    price: '',
     currency: 'CRC',
     province: 'San José',
     bedrooms: 0,
     bathrooms: 0,
     parkingSpaces: 0,
-    areaM2: 0,
+    areaM2: '',
     petsAllowed: false,
     furnished: false,
     condominium: false,
@@ -209,7 +232,7 @@ export default function PublicarPage() {
     if (type === 'checkbox') {
       finalValue = (e.target as HTMLInputElement).checked;
     } else if (type === 'number') {
-      finalValue = parseFloat(value) || 0;
+      finalValue = value === '' ? '' : (parseFloat(value) || 0);
     }
 
     setFormData((prev) => ({
@@ -352,7 +375,7 @@ export default function PublicarPage() {
   // 3. Step validation
   const validateStep = (s: number): boolean => {
     if (s === 1) {
-      if (formData.price <= 0) {
+      if (Number(formData.price) <= 0) {
         showToast('Por favor introduce un precio de salida válido superior a cero.', 'error');
         return false;
       }
@@ -367,7 +390,7 @@ export default function PublicarPage() {
         showToast('La descripción detallada debe tener al menos 30 caracteres para informar correctamente.', 'error');
         return false;
       }
-      if (formData.areaM2 <= 0) {
+      if (Number(formData.areaM2) <= 0) {
         showToast('Por favor introduzca el área en metros cuadrados de la propiedad.', 'error');
         return false;
       }
@@ -506,7 +529,14 @@ export default function PublicarPage() {
     setIsSubmittingProperty(true);
 
     // Call publish Server Action
-    const res = await createPropertyAction(formData);
+    const res = await createPropertyAction({
+      ...formData,
+      price: Number(formData.price) || 0,
+      areaM2: Number(formData.areaM2) || 0,
+      bedrooms: Number(formData.bedrooms) || 0,
+      bathrooms: Number(formData.bathrooms) || 0,
+      parkingSpaces: Number(formData.parkingSpaces) || 0,
+    } as PropertySubmitData);
 
     setIsSubmittingProperty(false);
 
@@ -914,7 +944,7 @@ export default function PublicarPage() {
                     <input
                       type="number"
                       name="bedrooms"
-                      value={formData.bedrooms || ''}
+                      value={formData.bedrooms ?? ''}
                       onChange={handleChange}
                       className="input-premium py-3 text-center"
                     />
@@ -927,7 +957,7 @@ export default function PublicarPage() {
                     <input
                       type="number"
                       name="bathrooms"
-                      value={formData.bathrooms || ''}
+                      value={formData.bathrooms ?? ''}
                       onChange={handleChange}
                       className="input-premium py-3 text-center"
                     />
@@ -940,7 +970,7 @@ export default function PublicarPage() {
                     <input
                       type="number"
                       name="parkingSpaces"
-                      value={formData.parkingSpaces || ''}
+                      value={formData.parkingSpaces ?? ''}
                       onChange={handleChange}
                       className="input-premium py-3 text-center"
                     />

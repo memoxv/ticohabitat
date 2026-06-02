@@ -117,8 +117,31 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
     }
   };
 
+  interface EditFormState {
+    type: 'buy' | 'rent';
+    propertyType: 'house' | 'apartment' | 'lot' | 'commercial' | 'quinta' | 'beach' | 'other';
+    title: string;
+    description: string;
+    price: number | '';
+    currency: 'CRC' | 'USD';
+    province: 'San José' | 'Alajuela' | 'Heredia' | 'Cartago' | 'Guanacaste' | 'Puntarenas' | 'Limón';
+    canton?: string;
+    district?: string;
+    bedrooms: number | '';
+    bathrooms: number | '';
+    parkingSpaces: number | '';
+    areaM2: number | '';
+    petsAllowed: boolean;
+    furnished: boolean;
+    condominium: boolean;
+    contactPhone: string;
+    whatsapp: string;
+    imageUrls: string[];
+    features?: string[];
+  }
+
   // Initialize form state
-  const [formData, setFormData] = useState<PropertySubmitData>(() => {
+  const [formData, setFormData] = useState<EditFormState>(() => {
     let parsedFeatures: string[] = [];
     try {
       parsedFeatures = JSON.parse(property.features || '[]');
@@ -276,7 +299,7 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
       showToast('La descripción es obligatoria.', 'error');
       return;
     }
-    if (formData.price <= 0) {
+    if (Number(formData.price) <= 0) {
       showToast('El precio debe ser mayor a cero.', 'error');
       return;
     }
@@ -291,7 +314,14 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
 
     setIsSubmitting(true);
     try {
-      const res = await updatePropertyAction(property.id, formData);
+      const res = await updatePropertyAction(property.id, {
+        ...formData,
+        price: Number(formData.price) || 0,
+        areaM2: Number(formData.areaM2) || 0,
+        bedrooms: Number(formData.bedrooms) || 0,
+        bathrooms: Number(formData.bathrooms) || 0,
+        parkingSpaces: Number(formData.parkingSpaces) || 0,
+      } as PropertySubmitData);
       if (res.success) {
         showToast(res.message, 'success');
         router.push('/dashboard');
@@ -426,8 +456,8 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
                 <label className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 dark:text-stone-500">Precio</label>
                 <input
                   type="number"
-                  value={formData.price || ''}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+                  value={formData.price ?? ''}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value === '' ? '' : (parseFloat(e.target.value) || 0) }))}
                   placeholder="Monto"
                   className="input-premium w-full py-3 text-xs"
                 />
@@ -483,8 +513,8 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
                 <label className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 dark:text-stone-500">Área M²</label>
                 <input
                   type="number"
-                  value={formData.areaM2 || ''}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, areaM2: parseFloat(e.target.value) || 0 }))}
+                  value={formData.areaM2 ?? ''}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, areaM2: e.target.value === '' ? '' : (parseFloat(e.target.value) || 0) }))}
                   placeholder="M²"
                   className="input-premium w-full py-3 text-xs"
                 />
@@ -495,8 +525,8 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
                     <label className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 dark:text-stone-500">Habitaciones</label>
                     <input
                       type="number"
-                      value={formData.bedrooms || ''}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, bedrooms: parseInt(e.target.value) || 0 }))}
+                      value={formData.bedrooms ?? ''}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, bedrooms: e.target.value === '' ? '' : (parseInt(e.target.value) || 0) }))}
                       className="input-premium w-full py-3 text-xs"
                     />
                   </div>
@@ -504,8 +534,8 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
                     <label className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 dark:text-stone-500">Baños</label>
                     <input
                       type="number"
-                      value={formData.bathrooms || ''}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, bathrooms: parseInt(e.target.value) || 0 }))}
+                      value={formData.bathrooms ?? ''}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, bathrooms: e.target.value === '' ? '' : (parseInt(e.target.value) || 0) }))}
                       className="input-premium w-full py-3 text-xs"
                     />
                   </div>
@@ -515,8 +545,8 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
                 <label className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 dark:text-stone-500">Parqueos</label>
                 <input
                   type="number"
-                  value={formData.parkingSpaces || ''}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, parkingSpaces: parseInt(e.target.value) || 0 }))}
+                  value={formData.parkingSpaces ?? ''}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, parkingSpaces: e.target.value === '' ? '' : (parseInt(e.target.value) || 0) }))}
                   className="input-premium w-full py-3 text-xs"
                 />
               </div>

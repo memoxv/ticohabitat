@@ -173,6 +173,32 @@ export default async function PropertyDetailsPage({ params }: { params: Promise<
     },
   };
 
+  const specItems = [];
+  if (property.propertyType !== 'lot' && property.propertyType !== 'commercial') {
+    specItems.push({
+      icon: <BedDouble className="h-5.5 w-5.5" />,
+      value: property.bedrooms,
+      label: property.bedrooms === 1 ? 'Habitación' : 'Habitaciones'
+    });
+  }
+  if (property.propertyType !== 'lot') {
+    specItems.push({
+      icon: <Bath className="h-5.5 w-5.5" />,
+      value: property.bathrooms,
+      label: property.bathrooms === 1 ? 'Baño' : 'Baños'
+    });
+    specItems.push({
+      icon: <Car className="h-5.5 w-5.5" />,
+      value: property.parkingSpaces,
+      label: property.parkingSpaces === 1 ? 'Parqueo' : 'Parqueos'
+    });
+  }
+  specItems.push({
+    icon: <Maximize className="h-5.5 w-5.5" />,
+    value: property.areaM2,
+    label: 'm² Área'
+  });
+
   return (
     <div className="flex-grow bg-stone-50/10 dark:bg-stone-950/10 pb-20">
       {/* Dynamic SEO Structural Data */}
@@ -243,33 +269,20 @@ export default async function PropertyDetailsPage({ params }: { params: Promise<
             </div>
 
             {/* Physical Specs Grid - Elegant minimal lines instead of bloated boxes */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 p-6 rounded-2xl border border-stone-200/50 dark:border-stone-850 bg-white dark:bg-stone-900 shadow-sm text-center">
-              {property.bedrooms > 0 && (
-                <div className="space-y-1">
-                  <div className="flex justify-center text-primary"><BedDouble className="h-5.5 w-5.5" /></div>
-                  <div className="text-xl font-black text-stone-900 dark:text-white font-mono tracking-tight">{property.bedrooms}</div>
-                  <div className="text-[10px] text-stone-400 font-bold uppercase tracking-wider">Habitaciones</div>
+            <div className={`grid ${
+              specItems.length === 4 
+                ? 'grid-cols-2 sm:grid-cols-4' 
+                : specItems.length === 3 
+                  ? 'grid-cols-3' 
+                  : 'grid-cols-1'
+            } gap-6 p-6 rounded-2xl border border-stone-200/50 dark:border-stone-850 bg-white dark:bg-stone-900 shadow-sm text-center`}>
+              {specItems.map((item, idx) => (
+                <div key={idx} className={`space-y-1${idx > 0 ? ' border-l border-stone-100 dark:border-stone-800' : ''}`}>
+                  <div className="flex justify-center text-primary">{item.icon}</div>
+                  <div className="text-xl font-black text-stone-900 dark:text-white font-mono tracking-tight">{item.value}</div>
+                  <div className="text-[10px] text-stone-400 font-bold uppercase tracking-wider">{item.label}</div>
                 </div>
-              )}
-              {property.bathrooms > 0 && (
-                <div className="space-y-1 border-l border-stone-100 dark:border-stone-800">
-                  <div className="flex justify-center text-primary"><Bath className="h-5.5 w-5.5" /></div>
-                  <div className="text-xl font-black text-stone-900 dark:text-white font-mono tracking-tight">{property.bathrooms}</div>
-                  <div className="text-[10px] text-stone-400 font-bold uppercase tracking-wider">Baños</div>
-                </div>
-              )}
-              {property.parkingSpaces > 0 && (
-                <div className="space-y-1 border-l border-stone-100 dark:border-stone-800">
-                  <div className="flex justify-center text-primary"><Car className="h-5.5 w-5.5" /></div>
-                  <div className="text-xl font-black text-stone-900 dark:text-white font-mono tracking-tight">{property.parkingSpaces}</div>
-                  <div className="text-[10px] text-stone-400 font-bold uppercase tracking-wider">Parqueos</div>
-                </div>
-              )}
-              <div className="space-y-1 border-l border-stone-100 dark:border-stone-800">
-                <div className="flex justify-center text-primary"><Maximize className="h-5.5 w-5.5" /></div>
-                <div className="text-xl font-black text-stone-900 dark:text-white font-mono tracking-tight">{property.areaM2}</div>
-                <div className="text-[10px] text-stone-400 font-bold uppercase tracking-wider">m² Área</div>
-              </div>
+              ))}
             </div>
 
             {/* Description */}
