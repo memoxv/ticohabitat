@@ -331,7 +331,7 @@ export async function activateFreeFeaturedAction(propertyId: string, durationDay
       },
     });
 
-    revalidatePropertyPaths({
+    await revalidatePropertyPaths({
       provinces: [property.province],
       propertySlug: property.slug,
     });

@@ -14,7 +14,7 @@ import { logSystemError } from '@/lib/logger';
  * Utility to revalidate all affected paths when a property changes state.
  * This guarantees that counts and search results remain perfectly accurate across all devices.
  */
-export function revalidatePropertyPaths({
+export async function revalidatePropertyPaths({
   provinces = [],
   propertySlug,
 }: {
@@ -280,7 +280,7 @@ export async function createPropertyAction(data: PropertySubmitData) {
       await trackMetric('listing_duplicate_flagged', property.id, reasons.join(', '));
     }
 
-    revalidatePropertyPaths({
+    await revalidatePropertyPaths({
       provinces: [data.province],
       propertySlug: property.slug,
     });
@@ -332,7 +332,7 @@ export async function deletePropertyAction(propertyId: string) {
 
     await trackMetric('listing_deleted', propertyId);
 
-    revalidatePropertyPaths({
+    await revalidatePropertyPaths({
       provinces: [property.province],
       propertySlug: property.slug,
     });
@@ -420,7 +420,7 @@ export async function moderatePropertyAction(propertyId: string, action: 'approv
         where: { id: propertyId },
         data: { status: 'active' },
       });
-      revalidatePropertyPaths({
+      await revalidatePropertyPaths({
         provinces: [property.province],
         propertySlug: property.slug,
       });
@@ -432,7 +432,7 @@ export async function moderatePropertyAction(propertyId: string, action: 'approv
         where: { id: propertyId },
         data: { status: 'rejected' },
       });
-      revalidatePropertyPaths({
+      await revalidatePropertyPaths({
         provinces: [property.province],
         propertySlug: property.slug,
       });
@@ -443,7 +443,7 @@ export async function moderatePropertyAction(propertyId: string, action: 'approv
       await db.property.delete({
         where: { id: propertyId },
       });
-      revalidatePropertyPaths({
+      await revalidatePropertyPaths({
         provinces: [property.province],
         propertySlug: property.slug,
       });
@@ -464,7 +464,7 @@ export async function moderatePropertyAction(propertyId: string, action: 'approv
           featuredExpiresAt: expirationDate,
         },
       });
-      revalidatePropertyPaths({
+      await revalidatePropertyPaths({
         provinces: [property.province],
         propertySlug: property.slug,
       });
@@ -481,7 +481,7 @@ export async function moderatePropertyAction(propertyId: string, action: 'approv
         where: { id: propertyId },
         data: { verified: !property.verified },
       });
-      revalidatePropertyPaths({
+      await revalidatePropertyPaths({
         provinces: [property.province],
         propertySlug: property.slug,
       });
@@ -579,7 +579,7 @@ export async function togglePropertyActiveStatusAction(propertyId: string, newSt
 
       await trackMetric('listing_active', propertyId);
 
-      revalidatePropertyPaths({
+      await revalidatePropertyPaths({
         provinces: [property.province],
         propertySlug: property.slug,
       });
@@ -594,7 +594,7 @@ export async function togglePropertyActiveStatusAction(propertyId: string, newSt
 
       await trackMetric('listing_deleted', propertyId); // track as inactive
 
-      revalidatePropertyPaths({
+      await revalidatePropertyPaths({
         provinces: [property.province],
         propertySlug: property.slug,
       });
@@ -716,7 +716,7 @@ export async function updatePropertyAction(propertyId: string, data: PropertySub
     });
 
     // 3. Clear relevant Next.js router cache paths
-    revalidatePropertyPaths({
+    await revalidatePropertyPaths({
       provinces: [property.province, data.province],
       propertySlug: property.slug,
     });

@@ -217,15 +217,15 @@ export async function moderateTransactionAction(
         select: { slug: true, province: true },
       });
       if (property) {
-        revalidatePropertyPaths({
+        await revalidatePropertyPaths({
           provinces: [property.province],
           propertySlug: property.slug,
         });
       } else {
-        revalidatePropertyPaths({});
+        await revalidatePropertyPaths({});
       }
     } else {
-      revalidatePropertyPaths({});
+      await revalidatePropertyPaths({});
     }
 
     return {
