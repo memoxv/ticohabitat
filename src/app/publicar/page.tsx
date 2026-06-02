@@ -128,6 +128,7 @@ export default function PublicarPage() {
   const [loadingLimit, setLoadingLimit] = useState(true);
   const [propertiesCount, setPropertiesCount] = useState(0);
   const [userRole, setUserRole] = useState('USER');
+  const [userPlanType, setUserPlanType] = useState('FREE');
 
   // Load user properties count and role
   useEffect(() => {
@@ -144,6 +145,7 @@ export default function PublicarPage() {
           if (res.success) {
             setPropertiesCount(res.count);
             setUserRole(res.role);
+            setUserPlanType(res.planType || 'FREE');
           }
           setLoadingLimit(false);
         })
@@ -692,7 +694,7 @@ export default function PublicarPage() {
 
   // Phone verification gate removed — only email verification is required to publish
 
-  if (user && userRole === 'USER' && propertiesCount >= 3) {
+  if (user && userRole === 'USER' && userPlanType === 'FREE' && propertiesCount >= 3) {
     return (
       <div className="flex-grow bg-stone-50/20 dark:bg-stone-950/20 py-20 flex items-center justify-center animate-fadeIn">
         <div className="max-w-md w-full px-6 text-center">

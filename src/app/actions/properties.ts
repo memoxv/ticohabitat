@@ -434,7 +434,7 @@ export async function getUserPropertiesCountAction() {
   try {
     const session = await getSession();
     if (!session) {
-      return { success: false, count: 0, role: 'USER' };
+      return { success: false, count: 0, role: 'USER', planType: 'FREE' };
     }
 
     let dbUser = await db.user.findUnique({
@@ -448,7 +448,7 @@ export async function getUserPropertiesCountAction() {
     }
 
     if (!dbUser) {
-      return { success: true, count: 0, role: 'USER' };
+      return { success: true, count: 0, role: 'USER', planType: 'FREE' };
     }
 
     const count = await db.property.count({
@@ -460,9 +460,9 @@ export async function getUserPropertiesCountAction() {
       },
     });
 
-    return { success: true, count, role: dbUser.role };
+    return { success: true, count, role: dbUser.role, planType: dbUser.planType };
   } catch (e) {
-    return { success: false, count: 0, role: 'USER' };
+    return { success: false, count: 0, role: 'USER', planType: 'FREE' };
   }
 }
 
