@@ -153,15 +153,14 @@ export async function createPropertyAction(data: PropertySubmitData) {
     const uniqueSuffix = Math.random().toString(36).substring(2, 6);
     const slug = `${baseSlug}-${uniqueSuffix}`;
 
-    // Enforce the phone number from the session / account if available
-    const accountPhone = session.verifiedPhone || data.contactPhone || '';
-    const cleanDigits = accountPhone.replace(/\D/g, '');
+    // Use the phone number from the form directly (no phone OTP verification required)
+    const cleanDigits = (data.contactPhone || '').replace(/\D/g, '');
     const phoneInput = cleanDigits.slice(-8); // Get last 8 digits (Costa Rican standard)
 
     if (phoneInput.length !== 8) {
       return {
         success: false,
-        message: 'Debe contar con un número de teléfono celular verificado de 8 dígitos para publicar la propiedad.',
+        message: 'Debe ingresar un número de teléfono celular de 8 dígitos para publicar la propiedad.',
       };
     }
 
@@ -594,15 +593,14 @@ export async function updatePropertyAction(propertyId: string, data: PropertySub
       }
     }
 
-    // Enforce the phone number from the session / account if available
-    const accountPhone = session.verifiedPhone || data.contactPhone || '';
-    const cleanDigits = accountPhone.replace(/\D/g, '');
+    // Use the phone number from the form directly (no phone OTP verification required)
+    const cleanDigits = (data.contactPhone || '').replace(/\D/g, '');
     const phoneInput = cleanDigits.slice(-8); // Get last 8 digits (Costa Rican standard)
 
     if (phoneInput.length !== 8) {
       return {
         success: false,
-        message: 'Debe contar con un número de teléfono celular verificado de 8 dígitos para actualizar la propiedad.',
+        message: 'Debe ingresar un número de teléfono celular de 8 dígitos para actualizar la propiedad.',
       };
     }
 
