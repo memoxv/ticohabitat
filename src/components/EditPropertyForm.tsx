@@ -431,7 +431,7 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
                     <label className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 dark:text-stone-500">Habitaciones</label>
                     <input
                       type="number"
-                      value={formData.bedrooms}
+                      value={formData.bedrooms || ''}
                       onChange={(e) => setFormData((prev) => ({ ...prev, bedrooms: parseInt(e.target.value) || 0 }))}
                       className="input-premium w-full py-3 text-xs"
                     />
@@ -440,7 +440,7 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
                     <label className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 dark:text-stone-500">Baños</label>
                     <input
                       type="number"
-                      value={formData.bathrooms}
+                      value={formData.bathrooms || ''}
                       onChange={(e) => setFormData((prev) => ({ ...prev, bathrooms: parseInt(e.target.value) || 0 }))}
                       className="input-premium w-full py-3 text-xs"
                     />
@@ -451,7 +451,7 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
                 <label className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 dark:text-stone-500">Parqueos</label>
                 <input
                   type="number"
-                  value={formData.parkingSpaces}
+                  value={formData.parkingSpaces || ''}
                   onChange={(e) => setFormData((prev) => ({ ...prev, parkingSpaces: parseInt(e.target.value) || 0 }))}
                   className="input-premium w-full py-3 text-xs"
                 />

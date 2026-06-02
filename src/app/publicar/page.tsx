@@ -51,10 +51,10 @@ export default function PublicarPage() {
     price: 0,
     currency: 'CRC',
     province: 'San José',
-    bedrooms: 2,
-    bathrooms: 1,
+    bedrooms: 0,
+    bathrooms: 0,
     parkingSpaces: 0,
-    areaM2: 75,
+    areaM2: 0,
     petsAllowed: false,
     furnished: false,
     condominium: false,
@@ -907,7 +907,7 @@ export default function PublicarPage() {
                     <input
                       type="number"
                       name="bedrooms"
-                      value={formData.bedrooms}
+                      value={formData.bedrooms || ''}
                       onChange={handleChange}
                       className="input-premium py-3 text-center"
                     />
@@ -920,7 +920,7 @@ export default function PublicarPage() {
                     <input
                       type="number"
                       name="bathrooms"
-                      value={formData.bathrooms}
+                      value={formData.bathrooms || ''}
                       onChange={handleChange}
                       className="input-premium py-3 text-center"
                     />
@@ -933,7 +933,7 @@ export default function PublicarPage() {
                     <input
                       type="number"
                       name="parkingSpaces"
-                      value={formData.parkingSpaces}
+                      value={formData.parkingSpaces || ''}
                       onChange={handleChange}
                       className="input-premium py-3 text-center"
                     />
@@ -945,7 +945,7 @@ export default function PublicarPage() {
                   <input
                     type="number"
                     name="areaM2"
-                    value={formData.areaM2}
+                    value={formData.areaM2 || ''}
                     onChange={handleChange}
                     className="input-premium py-3 text-center"
                   />
