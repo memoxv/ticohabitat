@@ -272,19 +272,35 @@ export async function getPropertyBySlug(slug: string) {
   });
 }
 
-export async function getSimilarProperties(propertyId: string, limit = 3) {
-  const property = await db.property.findUnique({
-    where: { id: propertyId },
-  });
+export async function getSimilarProperties(
+  property: { id: string; province: string; type: string } | string,
+  limit = 3
+) {
+  let propertyId: string;
+  let province: string;
+  let type: string;
 
-  if (!property) return [];
+  if (typeof property === 'string') {
+    const prop = await db.property.findUnique({
+      where: { id: property },
+      select: { id: true, province: true, type: true },
+    });
+    if (!prop) return [];
+    propertyId = prop.id;
+    province = prop.province;
+    type = prop.type;
+  } else {
+    propertyId = property.id;
+    province = property.province;
+    type = property.type;
+  }
 
   return await db.property.findMany({
     where: {
       id: { not: propertyId },
       status: 'active',
-      province: property.province,
-      type: property.type,
+      province,
+      type,
     },
     include: {
       images: true,
