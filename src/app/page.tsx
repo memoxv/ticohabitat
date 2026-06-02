@@ -21,16 +21,33 @@ export default async function Home() {
   // Run all data fetching in parallel for maximum speed
   const [featuredResult, ...countResults] = await Promise.all([
     getRandomFeaturedPropertiesAction(undefined, 3),
+    // Sales counts (0-6)
     ...PROVINCES.map((prov) =>
       process.env.DATABASE_URL
-        ? db.property.count({ where: { province: prov.name, status: 'active' } }).catch(() => 0)
+        ? db.property.count({ where: { province: prov.name, status: 'active', type: 'buy' } }).catch(() => 0)
+        : Promise.resolve(0)
+    ),
+    // Rental counts (7-13)
+    ...PROVINCES.map((prov) =>
+      process.env.DATABASE_URL
+        ? db.property.count({ where: { province: prov.name, status: 'active', type: 'rent' } }).catch(() => 0)
         : Promise.resolve(0)
     ),
   ]);
 
   const featuredItems = featuredResult.items;
   const featuredTotal = featuredResult.totalCount;
-  const provinceCounts = PROVINCES.map((prov, i) => ({ ...prov, count: countResults[i] as number }));
+  
+  const provinceCounts = PROVINCES.map((prov, i) => {
+    const buyCount = countResults[i] as number;
+    const rentCount = countResults[i + 7] as number;
+    return {
+      ...prov,
+      buyCount,
+      rentCount,
+      totalCount: buyCount + rentCount,
+    };
+  });
 
   return (
     <div className="flex flex-col min-h-screen bg-stone-50/20 dark:bg-stone-950/20 transition-colors duration-150">
@@ -127,27 +144,30 @@ export default async function Home() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {provinceCounts.map((prov) => (
-              <Link
+              <div
                 key={prov.slug}
-                href={`/comprar/${prov.slug}`}
-                className="group flex flex-col overflow-hidden rounded-xl border border-card-border bg-card-bg hover:bg-card-bg hover-lift shadow-sm transition-all duration-300"
+                className="group flex flex-col overflow-hidden rounded-xl border border-card-border bg-card-bg shadow-sm transition-all duration-300 hover:shadow-md"
               >
-                <div className="relative aspect-[16/11] overflow-hidden bg-stone-100 dark:bg-stone-900 border-b border-card-border">
+                {/* Image Link (Defaults to sales/comprar view) */}
+                <Link
+                  href={`/comprar/${prov.slug}`}
+                  className="relative aspect-[16/11] overflow-hidden bg-stone-100 dark:bg-stone-900 border-b border-card-border block"
+                >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={prov.image}
                     alt={prov.name}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-103"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-stone-900/50 via-stone-900/10 to-transparent opacity-40 dark:opacity-60" />
-                  <span className="absolute bottom-3 left-3 bg-stone-900/70 dark:bg-stone-950/70 backdrop-blur-xs text-[9px] font-black text-white px-2 py-0.5 rounded uppercase tracking-wider">
-                    {prov.count} anuncios
+                  <span className="absolute bottom-3 left-3 bg-stone-900/75 dark:bg-stone-950/75 backdrop-blur-xs text-[9px] font-black text-white px-2.5 py-1 rounded uppercase tracking-wider">
+                    {prov.totalCount} anuncios
                   </span>
-                </div>
+                </Link>
 
                 <div className="p-5 flex-grow flex flex-col justify-between space-y-4">
                   <div className="space-y-1.5">
-                    <h3 className="font-display font-black text-base text-stone-850 dark:text-stone-100 group-hover:text-primary transition-colors">
+                    <h3 className="font-display font-black text-base text-stone-850 dark:text-stone-100">
                       {prov.name}
                     </h3>
                     <p className="text-xs text-stone-450 dark:text-stone-400 leading-relaxed font-semibold">
@@ -155,16 +175,30 @@ export default async function Home() {
                     </p>
                   </div>
 
-                  <div className="pt-3.5 border-t border-stone-100 dark:border-stone-850/30 flex items-center justify-between">
-                    <span className="text-[10px] font-black text-stone-450 group-hover:text-primary uppercase tracking-widest transition-colors">
-                      Explorar región
-                    </span>
-                    <span className="text-sm font-black text-primary transition-transform group-hover:translate-x-0.5">
-                      →
-                    </span>
+                  {/* Two separate dynamic CTA buttons at the bottom */}
+                  <div className="pt-3.5 border-t border-stone-100 dark:border-stone-850/30 grid grid-cols-2 gap-2">
+                    <Link
+                      href={`/comprar/${prov.slug}`}
+                      className="flex flex-col items-center justify-center py-2.5 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-900 dark:text-stone-150 transition-colors"
+                    >
+                      <span className="text-[10px] font-black uppercase tracking-wider">Comprar</span>
+                      <span className="text-[8px] font-bold text-stone-450 dark:text-stone-550 mt-0.5">
+                        {prov.buyCount} {prov.buyCount === 1 ? 'anuncio' : 'anuncios'}
+                      </span>
+                    </Link>
+
+                    <Link
+                      href={`/alquilar/${prov.slug}`}
+                      className="flex flex-col items-center justify-center py-2.5 rounded-lg bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-800 dark:text-emerald-450 transition-colors border border-emerald-500/10"
+                    >
+                      <span className="text-[10px] font-black uppercase tracking-wider">Alquilar</span>
+                      <span className="text-[8px] font-bold text-emerald-700/80 dark:text-emerald-450/80 mt-0.5">
+                        {prov.rentCount} {prov.rentCount === 1 ? 'anuncio' : 'anuncios'}
+                      </span>
+                    </Link>
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         </div>

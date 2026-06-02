@@ -211,7 +211,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     showToast('Sesión cerrada correctamente', 'info');
     
     // Redirect to home page immediately to clear caches and ensure session-private routes are left cleanly
-    window.location.href = '/';
+    window.location.replace('/');
   };
 
   const toggleFavorite = (propertyId: string) => {
