@@ -10,6 +10,41 @@ import { generateSecureRandomHash } from '@/lib/auth';
 import { getUserEffectivePlan } from '@/lib/planInheritance';
 import { logSystemError } from '@/lib/logger';
 
+/**
+ * Utility to revalidate all affected paths when a property changes state.
+ * This guarantees that counts and search results remain perfectly accurate across all devices.
+ */
+export function revalidatePropertyPaths({
+  provinces = [],
+  propertySlug,
+}: {
+  provinces?: string[];
+  propertySlug?: string;
+}) {
+  // Always clear main landing and indexing paths
+  revalidatePath('/');
+  revalidatePath('/comprar');
+  revalidatePath('/alquilar');
+  revalidatePath('/dashboard');
+  revalidatePath('/admin');
+  revalidatePath('/admin/monetizacion');
+
+  for (const province of provinces) {
+    if (!province) continue;
+    const slug = province
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/ /g, '-');
+    revalidatePath(`/comprar/${slug}`);
+    revalidatePath(`/alquilar/${slug}`);
+  }
+
+  if (propertySlug) {
+    revalidatePath(`/propiedad/${propertySlug}`);
+  }
+}
+
 export interface PropertySubmitData {
   type: 'buy' | 'rent';
   propertyType: 'house' | 'apartment' | 'lot' | 'commercial' | 'quinta' | 'beach' | 'other';
@@ -245,16 +280,10 @@ export async function createPropertyAction(data: PropertySubmitData) {
       await trackMetric('listing_duplicate_flagged', property.id, reasons.join(', '));
     }
 
-    // Clean slugs for revalidation to match routing structure
-    const provinceSlug = data.province
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/ /g, '-');
-
-    revalidatePath('/');
-    revalidatePath(`/comprar/${provinceSlug}`);
-    revalidatePath(`/alquilar/${provinceSlug}`);
+    revalidatePropertyPaths({
+      provinces: [data.province],
+      propertySlug: property.slug,
+    });
 
     return {
       success: true,
@@ -303,8 +332,10 @@ export async function deletePropertyAction(propertyId: string) {
 
     await trackMetric('listing_deleted', propertyId);
 
-    revalidatePath('/');
-    revalidatePath('/dashboard');
+    revalidatePropertyPaths({
+      provinces: [property.province],
+      propertySlug: property.slug,
+    });
     return { success: true, message: 'Anuncio eliminado correctamente.' };
   } catch (error) {
     console.error(error);
@@ -375,10 +406,23 @@ export async function moderatePropertyAction(propertyId: string, action: 'approv
       return { success: false, message: 'Acceso denegado: Se requiere rol de Administrador.' };
     }
 
+    const property = await db.property.findUnique({
+      where: { id: propertyId },
+      select: { id: true, slug: true, province: true, featured: true, verified: true }
+    });
+
+    if (!property) {
+      return { success: false, message: 'La propiedad especificada no existe.' };
+    }
+
     if (action === 'approve') {
       await db.property.update({
         where: { id: propertyId },
         data: { status: 'active' },
+      });
+      revalidatePropertyPaths({
+        provinces: [property.province],
+        propertySlug: property.slug,
       });
       return { success: true, message: 'Propiedad aprobada exitosamente.' };
     }
@@ -388,6 +432,10 @@ export async function moderatePropertyAction(propertyId: string, action: 'approv
         where: { id: propertyId },
         data: { status: 'rejected' },
       });
+      revalidatePropertyPaths({
+        provinces: [property.province],
+        propertySlug: property.slug,
+      });
       return { success: true, message: 'Propiedad rechazada.' };
     }
 
@@ -395,14 +443,15 @@ export async function moderatePropertyAction(propertyId: string, action: 'approv
       await db.property.delete({
         where: { id: propertyId },
       });
+      revalidatePropertyPaths({
+        provinces: [property.province],
+        propertySlug: property.slug,
+      });
       return { success: true, message: 'Propiedad eliminada permanentemente.' };
     }
 
-
-
     if (action === 'feature') {
-      const prop = await db.property.findUnique({ where: { id: propertyId } });
-      const nextFeatured = !prop?.featured;
+      const nextFeatured = !property.featured;
       // Default to 30 days maximum duration for manual feature toggles, or null if disabling
       const expirationDate = nextFeatured
         ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
@@ -415,6 +464,10 @@ export async function moderatePropertyAction(propertyId: string, action: 'approv
           featuredExpiresAt: expirationDate,
         },
       });
+      revalidatePropertyPaths({
+        provinces: [property.province],
+        propertySlug: property.slug,
+      });
       return { 
         success: true, 
         message: nextFeatured 
@@ -424,10 +477,13 @@ export async function moderatePropertyAction(propertyId: string, action: 'approv
     }
 
     if (action === 'verify') {
-      const prop = await db.property.findUnique({ where: { id: propertyId } });
       await db.property.update({
         where: { id: propertyId },
-        data: { verified: !prop?.verified },
+        data: { verified: !property.verified },
+      });
+      revalidatePropertyPaths({
+        provinces: [property.province],
+        propertySlug: property.slug,
       });
       return { success: true, message: 'Estado Verificado modificado.' };
     }
@@ -437,6 +493,8 @@ export async function moderatePropertyAction(propertyId: string, action: 'approv
     return { success: false, message: 'Error en la moderación del anuncio.' };
   }
 }
+
+
 
 export async function getUserPropertiesCountAction() {
   try {
@@ -484,7 +542,7 @@ export async function togglePropertyActiveStatusAction(propertyId: string, newSt
 
     const property = await db.property.findUnique({
       where: { id: propertyId },
-      select: { id: true, userId: true, title: true, status: true, province: true }
+      select: { id: true, userId: true, title: true, status: true, province: true, slug: true }
     });
 
     if (!property) {
@@ -521,16 +579,10 @@ export async function togglePropertyActiveStatusAction(propertyId: string, newSt
 
       await trackMetric('listing_active', propertyId);
 
-      const provinceSlug = property.province
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/ /g, '-');
-
-      revalidatePath('/');
-      revalidatePath('/dashboard');
-      revalidatePath(`/comprar/${provinceSlug}`);
-      revalidatePath(`/alquilar/${provinceSlug}`);
+      revalidatePropertyPaths({
+        provinces: [property.province],
+        propertySlug: property.slug,
+      });
 
       return { success: true, message: 'Tu anuncio ha sido reactivado con éxito y ya es visible al público.' };
     } else {
@@ -542,16 +594,10 @@ export async function togglePropertyActiveStatusAction(propertyId: string, newSt
 
       await trackMetric('listing_deleted', propertyId); // track as inactive
 
-      const provinceSlug = property.province
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/ /g, '-');
-
-      revalidatePath('/');
-      revalidatePath('/dashboard');
-      revalidatePath(`/comprar/${provinceSlug}`);
-      revalidatePath(`/alquilar/${provinceSlug}`);
+      revalidatePropertyPaths({
+        provinces: [property.province],
+        propertySlug: property.slug,
+      });
 
       return { success: true, message: 'Tu anuncio ha sido pausado. Ya no es visible al público, pero permanece guardado en tu panel.' };
     }
@@ -670,27 +716,10 @@ export async function updatePropertyAction(propertyId: string, data: PropertySub
     });
 
     // 3. Clear relevant Next.js router cache paths
-    const oldProvinceSlug = property.province
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/ /g, '-');
-
-    const newProvinceSlug = data.province
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/ /g, '-');
-
-    revalidatePath('/');
-    revalidatePath('/dashboard');
-    revalidatePath(`/propiedad/${property.slug}`);
-    revalidatePath(`/comprar/${oldProvinceSlug}`);
-    revalidatePath(`/alquilar/${oldProvinceSlug}`);
-    if (oldProvinceSlug !== newProvinceSlug) {
-      revalidatePath(`/comprar/${newProvinceSlug}`);
-      revalidatePath(`/alquilar/${newProvinceSlug}`);
-    }
+    revalidatePropertyPaths({
+      provinces: [property.province, data.province],
+      propertySlug: property.slug,
+    });
 
     return { success: true, message: '¡Tu anuncio ha sido actualizado con éxito!' };
   } catch (error) {

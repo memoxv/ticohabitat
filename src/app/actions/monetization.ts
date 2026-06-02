@@ -3,6 +3,7 @@
 import { db } from '@/lib/db';
 import { getSession } from '@/lib/session';
 import { revalidatePath } from 'next/cache';
+import { revalidatePropertyPaths } from '@/app/actions/properties';
 
 export interface FeaturedTransactionData {
   propertyId: string;
@@ -330,8 +331,10 @@ export async function activateFreeFeaturedAction(propertyId: string, durationDay
       },
     });
 
-    revalidatePath(`/dashboard`);
-    revalidatePath(`/propiedad/${property.slug}`);
+    revalidatePropertyPaths({
+      provinces: [property.province],
+      propertySlug: property.slug,
+    });
 
     return {
       success: true,

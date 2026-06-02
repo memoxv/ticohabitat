@@ -3,6 +3,7 @@
 import { db } from '@/lib/db';
 import { getSession } from '@/lib/session';
 import { revalidatePath } from 'next/cache';
+import { revalidatePropertyPaths } from '@/app/actions/properties';
 
 export async function getPendingTransactionsAction() {
   const session = await getSession();
@@ -210,15 +211,21 @@ export async function moderateTransactionAction(
     // Revalidate paths for instant UI changes
     revalidatePath('/admin/monetizacion');
     revalidatePath('/dashboard/planes');
-    revalidatePath('/dashboard');
     if (tx.referenceId) {
       const property = await db.property.findUnique({
         where: { id: tx.referenceId },
-        select: { slug: true },
+        select: { slug: true, province: true },
       });
       if (property) {
-        revalidatePath(`/propiedad/${property.slug}`);
+        revalidatePropertyPaths({
+          provinces: [property.province],
+          propertySlug: property.slug,
+        });
+      } else {
+        revalidatePropertyPaths({});
       }
+    } else {
+      revalidatePropertyPaths({});
     }
 
     return {
