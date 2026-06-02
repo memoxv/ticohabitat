@@ -1201,24 +1201,21 @@ export default function PublicarPage() {
                 </div>
               </div>
 
-              {/* Contact Phone Input - Premium Design */}
-              <div className="bg-stone-50/40 dark:bg-stone-950/40 border border-stone-200/80 dark:border-stone-800 rounded-xl p-5 space-y-4">
+              {/* Contact Phone Display - Premium & Read Only */}
+              <div className="bg-stone-50/40 dark:bg-stone-950/40 border border-stone-200/80 dark:border-stone-800 rounded-xl p-5 space-y-3">
                 <div>
                   <h4 className="font-display font-bold text-xs uppercase tracking-wider text-stone-700 dark:text-stone-300">Información de Contacto</h4>
-                  <p className="text-[10px] text-stone-450 dark:text-stone-500 mt-1 font-semibold">Confirmá el número de teléfono celular donde los clientes te contactarán por WhatsApp.</p>
+                  <p className="text-[10px] text-stone-450 dark:text-stone-500 mt-1 font-semibold">El anuncio se enlazará a tu número de teléfono registrado. Para cambiarlo, debes contactar a soporte.</p>
                 </div>
                 
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="contactPhone"
-                    maxLength={8}
-                    placeholder="Ej: 88888888"
-                    value={formData.contactPhone}
-                    onChange={handlePhoneChange}
-                    className="w-full rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 px-4 py-3 pl-10 text-xs focus:outline-none focus:border-primary text-stone-850 dark:text-stone-100 font-mono tracking-wider"
-                  />
-                  <Phone className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-stone-400" />
+                <div className="flex items-center gap-3 bg-white dark:bg-stone-900 px-4 py-3 rounded-lg border border-stone-200 dark:border-stone-800">
+                  <Phone className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-500" />
+                  <span className="text-xs font-mono font-bold tracking-wider text-stone-850 dark:text-stone-100">
+                    +{phoneVerified || formData.contactPhone || 'No registrado'}
+                  </span>
+                  <span className="ml-auto text-[9px] font-extrabold bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-250/20 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded uppercase tracking-wider">
+                    Verificado y Enlazado
+                  </span>
                 </div>
               </div>
 

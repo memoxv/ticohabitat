@@ -645,23 +645,20 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
             <h3 className="font-display font-bold text-xs uppercase tracking-wider text-stone-400 dark:text-stone-550">5. Información de Contacto</h3>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 dark:text-stone-550">
-                Teléfono Celular
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 dark:text-stone-550 flex items-center justify-between">
+                <span>Teléfono Celular de Contacto</span>
+                <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-500 uppercase tracking-wider">✓ Vinculado a tu cuenta</span>
               </label>
               <input
                 type="text"
                 value={formData.contactPhone}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, '').slice(0, 8);
-                  setFormData((prev) => ({
-                    ...prev,
-                    contactPhone: val,
-                    whatsapp: val,
-                  }));
-                }}
+                disabled
                 placeholder="Ej: 88888888"
-                className="input-premium w-full py-3 text-xs font-mono"
+                className="input-premium w-full py-3 text-xs font-mono opacity-65 bg-stone-100/50 dark:bg-stone-850/30 cursor-not-allowed"
               />
+              <p className="text-[9px] text-stone-450 dark:text-stone-550 font-bold leading-relaxed mt-1">
+                Por seguridad, el número telefónico está vinculado a tu cuenta. Si deseas cambiarlo, por favor ponte en contacto con el administrador.
+              </p>
             </div>
 
             <div className="space-y-1.5">
