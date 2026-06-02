@@ -79,7 +79,10 @@ export default function PropertyCard({ property }: { property: PropertyCardProps
     }).catch(console.error);
 
     const text = `Hola! Me interesa tu anuncio de ${propertyTypeLabel} en TicoHabitat: ${property.title} (Link: https://ticohabitat.com/propiedad/${property.slug})`;
-    const waUrl = `https://wa.me/506${cleanPhone}?text=${encodeURIComponent(text)}`;
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const waUrl = isMobile 
+      ? `whatsapp://send?phone=506${cleanPhone}&text=${encodeURIComponent(text)}`
+      : `https://wa.me/506${cleanPhone}?text=${encodeURIComponent(text)}`;
     window.open(waUrl, '_blank');
   };
 
