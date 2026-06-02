@@ -24,6 +24,7 @@ export interface PropertyCardProps {
   verified: boolean;
   imageUrl?: string | null;
   contactPhone: string;
+  whatsapp?: string | null;
 }
 
 export default function PropertyCard({ property }: { property: PropertyCardProps }) {
@@ -61,9 +62,11 @@ export default function PropertyCard({ property }: { property: PropertyCardProps
       body: JSON.stringify({ event: 'whatsapp_click', propertyId: property.id }),
     }).catch(console.error);
 
-    // Form Costa Rican WhatsApp link
-    const cleanPhone = property.contactPhone.replace(/\D/g, '');
-    const waUrl = `https://wa.me/506${cleanPhone}?text=Hola!%20Me%20interesa%20tu%20anuncio%20de%20${propertyTypeLabel}%20en%20TicoHabitat:%20${encodeURIComponent(property.title)}%20(Link:%20https://ticohabitat.com/propiedad/${property.slug})`;
+    // Form Costa Rican WhatsApp link using registered WhatsApp number (or contactPhone as fallback)
+    const targetPhone = property.whatsapp || property.contactPhone;
+    const cleanPhone = targetPhone.replace(/\D/g, '').slice(-8);
+    const text = `Hola! Me interesa tu anuncio de ${propertyTypeLabel} en TicoHabitat: ${property.title} (Link: https://ticohabitat.com/propiedad/${property.slug})`;
+    const waUrl = `https://wa.me/506${cleanPhone}?text=${encodeURIComponent(text)}`;
     window.open(waUrl, '_blank');
   };
 

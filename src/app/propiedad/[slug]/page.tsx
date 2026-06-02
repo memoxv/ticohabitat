@@ -403,6 +403,7 @@ export default async function PropertyDetailsPage({ params }: { params: Promise<
                     verified: prop.verified,
                     imageUrl: prop.images?.[0]?.url,
                     contactPhone: prop.contactPhone,
+                    whatsapp: prop.whatsapp,
                   }}
                 />
               ))}

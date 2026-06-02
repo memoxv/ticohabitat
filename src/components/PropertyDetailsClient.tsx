@@ -61,8 +61,9 @@ export default function PropertyDetailsClient({ property }: PropertyDetailsClien
       body: JSON.stringify({ event: 'whatsapp_click', propertyId: property.id }),
     }).catch(console.error);
 
-    // Form Costa Rican WhatsApp link
-    const cleanPhone = property.contactPhone.replace(/\D/g, '');
+    // Form Costa Rican WhatsApp link using the registered WhatsApp number (or contactPhone as fallback)
+    const targetPhone = property.whatsapp || property.contactPhone;
+    const cleanPhone = targetPhone.replace(/\D/g, '').slice(-8);
     const text = `Hola! Vi tu anuncio de ${propertyTypeLabel} en TicoHabitat: "${property.title}". ¿Sigue disponible? (Enlace: https://ticohabitat.com/propiedad/${property.slug})`;
     const waUrl = `https://wa.me/506${cleanPhone}?text=${encodeURIComponent(text)}`;
     window.open(waUrl, '_blank');

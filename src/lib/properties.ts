@@ -628,6 +628,7 @@ export async function getRandomFeaturedPropertiesAction(type?: 'buy' | 'rent', l
       verified: p.verified,
       imageUrl: p.images?.[0]?.url || null,
       contactPhone: p.contactPhone,
+      whatsapp: p.whatsapp,
     }));
 
     return { items, totalCount };

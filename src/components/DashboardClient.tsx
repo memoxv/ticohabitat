@@ -800,6 +800,7 @@ export default function DashboardClient({ initialProperties, userSession }: Dash
                       verified: prop.verified,
                       imageUrl: prop.images?.[0]?.url,
                       contactPhone: prop.contactPhone,
+                      whatsapp: prop.whatsapp,
                     }}
                   />
                 ))}

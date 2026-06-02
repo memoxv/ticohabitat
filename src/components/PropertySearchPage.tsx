@@ -433,6 +433,7 @@ export default function PropertySearchPage({
                 verified: property.verified,
                 imageUrl: property.images?.[0]?.url,
                 contactPhone: property.contactPhone,
+                whatsapp: property.whatsapp,
               }}
             />
           ))}
