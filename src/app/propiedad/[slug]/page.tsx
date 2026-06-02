@@ -197,11 +197,13 @@ export default async function PropertyDetailsPage({ params }: { params: Promise<
       });
     }
   }
-  specItems.push({
-    icon: <Maximize className="h-5.5 w-5.5" />,
-    value: property.areaM2,
-    label: 'm² Área'
-  });
+  if (property.areaM2 > 0) {
+    specItems.push({
+      icon: <Maximize className="h-5.5 w-5.5" />,
+      value: property.areaM2,
+      label: 'm² Área'
+    });
+  }
 
   return (
     <div className="flex-grow bg-stone-50/10 dark:bg-stone-950/10 pb-20">

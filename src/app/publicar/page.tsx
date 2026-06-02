@@ -71,13 +71,13 @@ export default function PublicarPage() {
     propertyType: 'house',
     title: '',
     description: '',
-    price: '',
+    price: 0,
     currency: 'CRC',
     province: 'San José',
     bedrooms: 0,
     bathrooms: 0,
     parkingSpaces: 0,
-    areaM2: '',
+    areaM2: 0,
     petsAllowed: false,
     furnished: false,
     condominium: false,
@@ -889,9 +889,14 @@ export default function PublicarPage() {
                   <input
                     type="number"
                     name="price"
-                    value={formData.price || ''}
+                    value={formData.price ?? ''}
                     placeholder="Monto de venta o mensualidad"
                     onChange={handleChange}
+                    onKeyDown={(e) => {
+                      if (['e', 'E', '+', '-'].includes(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
                     className="input-premium py-3"
                   />
                 </div>
@@ -946,6 +951,11 @@ export default function PublicarPage() {
                       name="bedrooms"
                       value={formData.bedrooms ?? ''}
                       onChange={handleChange}
+                      onKeyDown={(e) => {
+                        if (['e', 'E', '+', '-', '.'].includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
                       className="input-premium py-3 text-center"
                     />
                   </div>
@@ -959,6 +969,11 @@ export default function PublicarPage() {
                       name="bathrooms"
                       value={formData.bathrooms ?? ''}
                       onChange={handleChange}
+                      onKeyDown={(e) => {
+                        if (['e', 'E', '+', '-', '.'].includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
                       className="input-premium py-3 text-center"
                     />
                   </div>
@@ -972,6 +987,11 @@ export default function PublicarPage() {
                       name="parkingSpaces"
                       value={formData.parkingSpaces ?? ''}
                       onChange={handleChange}
+                      onKeyDown={(e) => {
+                        if (['e', 'E', '+', '-', '.'].includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
                       className="input-premium py-3 text-center"
                     />
                   </div>
@@ -982,8 +1002,13 @@ export default function PublicarPage() {
                   <input
                     type="number"
                     name="areaM2"
-                    value={formData.areaM2 || ''}
+                    value={formData.areaM2 ?? ''}
                     onChange={handleChange}
+                    onKeyDown={(e) => {
+                      if (['e', 'E', '+', '-'].includes(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
                     className="input-premium py-3 text-center"
                   />
                 </div>

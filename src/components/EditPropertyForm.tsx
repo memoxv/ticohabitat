@@ -458,6 +458,11 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
                   type="number"
                   value={formData.price ?? ''}
                   onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value === '' ? '' : (parseFloat(e.target.value) || 0) }))}
+                  onKeyDown={(e) => {
+                    if (['e', 'E', '+', '-'].includes(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
                   placeholder="Monto"
                   className="input-premium w-full py-3 text-xs"
                 />
@@ -515,6 +520,11 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
                   type="number"
                   value={formData.areaM2 ?? ''}
                   onChange={(e) => setFormData((prev) => ({ ...prev, areaM2: e.target.value === '' ? '' : (parseFloat(e.target.value) || 0) }))}
+                  onKeyDown={(e) => {
+                    if (['e', 'E', '+', '-'].includes(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
                   placeholder="M²"
                   className="input-premium w-full py-3 text-xs"
                 />
@@ -527,6 +537,11 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
                       type="number"
                       value={formData.bedrooms ?? ''}
                       onChange={(e) => setFormData((prev) => ({ ...prev, bedrooms: e.target.value === '' ? '' : (parseInt(e.target.value) || 0) }))}
+                      onKeyDown={(e) => {
+                        if (['e', 'E', '+', '-', '.'].includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
                       className="input-premium w-full py-3 text-xs"
                     />
                   </div>
@@ -536,6 +551,11 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
                       type="number"
                       value={formData.bathrooms ?? ''}
                       onChange={(e) => setFormData((prev) => ({ ...prev, bathrooms: e.target.value === '' ? '' : (parseInt(e.target.value) || 0) }))}
+                      onKeyDown={(e) => {
+                        if (['e', 'E', '+', '-', '.'].includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
                       className="input-premium w-full py-3 text-xs"
                     />
                   </div>
@@ -547,6 +567,11 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
                   type="number"
                   value={formData.parkingSpaces ?? ''}
                   onChange={(e) => setFormData((prev) => ({ ...prev, parkingSpaces: e.target.value === '' ? '' : (parseInt(e.target.value) || 0) }))}
+                  onKeyDown={(e) => {
+                    if (['e', 'E', '+', '-', '.'].includes(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
                   className="input-premium w-full py-3 text-xs"
                 />
               </div>
