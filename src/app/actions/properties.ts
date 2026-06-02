@@ -113,6 +113,25 @@ export async function createPropertyAction(data: PropertySubmitData) {
       };
     }
 
+    // CRITICAL: Retrieve the registered phone number directly from the database user record to prevent spoofing
+    const userPhone = (dbUser as any)?.phone;
+    if (!userPhone) {
+      return {
+        success: false,
+        message: 'Su cuenta no cuenta con un número de teléfono registrado. Por favor contacte al administrador.',
+      };
+    }
+
+    const cleanDigits = userPhone.replace(/\D/g, '');
+    const phoneInput = cleanDigits.slice(-8); // Get last 8 digits (Costa Rican standard)
+
+    if (phoneInput.length !== 8) {
+      return {
+        success: false,
+        message: 'El número de teléfono registrado en su cuenta es inválido. Debe tener exactamente 8 dígitos.',
+      };
+    }
+
     // 2. Perform anti-spam check: check listing count and duplicate score
     const duplicateResult = await checkForDuplicates({
       type: data.type,
@@ -121,9 +140,10 @@ export async function createPropertyAction(data: PropertySubmitData) {
       description: data.description,
       price: data.price,
       province: data.province,
-      contactPhone: data.contactPhone,
-      whatsapp: data.whatsapp,
+      contactPhone: phoneInput,
+      whatsapp: phoneInput,
       imageUrls: data.imageUrls,
+      userId: resolvedUserId,
     });
 
     const reasons = duplicateResult.reasons || [];
@@ -152,25 +172,6 @@ export async function createPropertyAction(data: PropertySubmitData) {
       .replace(/(^-|-$)+/g, '');
     const uniqueSuffix = Math.random().toString(36).substring(2, 6);
     const slug = `${baseSlug}-${uniqueSuffix}`;
-
-    // CRITICAL: Retrieve the registered phone number directly from the database user record to prevent spoofing
-    const userPhone = (dbUser as any)?.phone;
-    if (!userPhone) {
-      return {
-        success: false,
-        message: 'Su cuenta no cuenta con un número de teléfono registrado. Por favor contacte al administrador.',
-      };
-    }
-
-    const cleanDigits = userPhone.replace(/\D/g, '');
-    const phoneInput = cleanDigits.slice(-8); // Get last 8 digits (Costa Rican standard)
-
-    if (phoneInput.length !== 8) {
-      return {
-        success: false,
-        message: 'El número de teléfono registrado en su cuenta es inválido. Debe tener exactamente 8 dígitos.',
-      };
-    }
 
     const whatsappUrl = `https://wa.me/506${phoneInput}`;
 

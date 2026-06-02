@@ -63,6 +63,7 @@ export async function checkForDuplicates(params: {
   contactPhone: string;
   whatsapp: string;
   imageUrls: string[];
+  userId?: string;
 }): Promise<CheckResult> {
   const {
     type,
@@ -73,6 +74,7 @@ export async function checkForDuplicates(params: {
     province,
     contactPhone,
     imageUrls,
+    userId,
   } = params;
 
   const reasons: string[] = [];
@@ -92,11 +94,26 @@ export async function checkForDuplicates(params: {
 
   // Calculate limits (e.g., maximum 3 listings per phone)
   if (phoneListings.length >= 3) {
-    return {
-      isSpam: true,
-      score: 100,
-      reasons: [`Límite excedido: El número de teléfono ${contactPhone} ya tiene 3 o más anuncios activos.`],
-    };
+    let isPremiumOrAdmin = false;
+    if (userId) {
+      const { getUserEffectivePlan } = await import('./planInheritance');
+      const plan = await getUserEffectivePlan(userId);
+      const user = await db.user.findUnique({
+        where: { id: userId },
+        select: { role: true }
+      });
+      if (plan.planType === 'PREMIUM' || plan.planType === 'AGENCY' || user?.role === 'ADMIN') {
+        isPremiumOrAdmin = true;
+      }
+    }
+
+    if (!isPremiumOrAdmin) {
+      return {
+        isSpam: true,
+        score: 100,
+        reasons: [`Límite excedido: El número de teléfono ${contactPhone} ya tiene 3 o más anuncios activos.`],
+      };
+    }
   }
 
   // 2. Query other properties in the same province & type to find content duplicates
