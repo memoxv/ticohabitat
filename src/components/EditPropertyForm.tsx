@@ -645,18 +645,12 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
             <h3 className="font-display font-bold text-xs uppercase tracking-wider text-stone-400 dark:text-stone-550">5. Información de Contacto</h3>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 dark:text-stone-550 flex items-center justify-between">
-                <span>Teléfono Celular</span>
-                {phoneVerified ? (
-                  <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-500 uppercase tracking-wider">✓ Cuenta Verificada</span>
-                ) : (
-                  <span className="text-[9px] font-bold text-amber-600 dark:text-amber-550 uppercase tracking-wider">⚠ Requiere Verificación</span>
-                )}
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 dark:text-stone-550">
+                Teléfono Celular
               </label>
               <input
                 type="text"
                 value={formData.contactPhone}
-                disabled={!!phoneVerified}
                 onChange={(e) => {
                   const val = e.target.value.replace(/\D/g, '').slice(0, 8);
                   setFormData((prev) => ({
@@ -666,22 +660,13 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
                   }));
                 }}
                 placeholder="Ej: 88888888"
-                className={`input-premium w-full py-3 text-xs font-mono ${
-                  phoneVerified 
-                    ? 'opacity-65 bg-stone-100/50 dark:bg-stone-850/30 cursor-not-allowed' 
-                    : ''
-                }`}
+                className="input-premium w-full py-3 text-xs font-mono"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-extrabold uppercase tracking-wider text-stone-450 dark:text-stone-550 flex items-center justify-between">
-                <span>WhatsApp (Número Completo)</span>
-                {phoneVerified ? (
-                  <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-500 uppercase tracking-wider">✓ Cuenta Verificada</span>
-                ) : (
-                  <span className="text-[9px] font-bold text-amber-600 dark:text-amber-550 uppercase tracking-wider">⚠ Requiere Verificación</span>
-                )}
+              <label className="text-[10px] font-extrabold uppercase tracking-wider text-stone-450 dark:text-stone-550">
+                WhatsApp (Número Completo)
               </label>
               <input
                 type="text"
@@ -691,65 +676,6 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
                 className="input-premium w-full py-3 text-xs opacity-65 bg-stone-100/50 dark:bg-stone-850/30 cursor-not-allowed font-mono"
               />
             </div>
-
-            {!phoneVerified && (
-              <div className="space-y-3 pt-2">
-                {/* Dev helper drawer */}
-                {process.env.NODE_ENV !== 'production' && devOtpLog && (
-                  <div className="border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-950/60 text-stone-700 dark:text-stone-300 rounded-xl p-5 text-xs flex flex-col items-center gap-2.5 shadow-inner">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-450 tracking-wider uppercase">
-                      <Sparkles className="h-4 w-4 animate-pulse text-amber-500" />
-                      <span>WhatsApp OTP Simulador Bot:</span>
-                    </div>
-                    <div className="text-center font-medium">Código OTP enviado por WhatsApp:</div>
-                    <div className="text-2xl font-mono tracking-widest font-black text-stone-950 dark:text-stone-100 bg-white dark:bg-stone-900 px-4.5 py-1.5 rounded border border-stone-200 dark:border-stone-850 shadow-inner mt-1">
-                      {devOtpLog}
-                    </div>
-                  </div>
-                )}
-
-                {!devOtpLog ? (
-                  <button
-                    type="button"
-                    onClick={handleRequestOtp}
-                    disabled={sendingOtp || formData.contactPhone.length < 8}
-                    className="btn-primary w-full py-2.5 text-xs cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
-                  >
-                    {sendingOtp ? 'Enviando OTP...' : 'Solicitar Código por WhatsApp'}
-                  </button>
-                ) : (
-                  <div className="space-y-2">
-                    <input
-                      type="text"
-                      maxLength={6}
-                      placeholder="Introduce el código OTP de 6 dígitos"
-                      value={otpCode}
-                      onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                      className="input-premium py-2.5 text-center font-mono tracking-widest text-xs"
-                    />
-
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={handleRequestOtp}
-                        disabled={sendingOtp}
-                        className="btn-secondary flex-1 py-2 text-xs cursor-pointer disabled:opacity-50"
-                      >
-                        Reenviar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleVerifyOtpSubmit}
-                        disabled={verifyingOtp || otpCode.length < 6}
-                        className="btn-primary flex-1 py-2 text-xs cursor-pointer disabled:opacity-50"
-                      >
-                        {verifyingOtp ? 'Verificando...' : 'Verificar OTP'}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
 
           {/* Save buttons */}

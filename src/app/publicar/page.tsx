@@ -497,6 +497,12 @@ export default function PublicarPage() {
       return;
     }
 
+    const cleanPhone = (formData.contactPhone || '').replace(/\D/g, '').slice(-8);
+    if (cleanPhone.length !== 8) {
+      showToast('Debe ingresar un número de teléfono celular de 8 dígitos para publicar.', 'error');
+      return;
+    }
+
     setIsSubmittingProperty(true);
     
     // Call publish Server Action
@@ -1192,6 +1198,27 @@ export default function PublicarPage() {
                     )}
                     <span>{formData.areaM2} m²</span>
                   </div>
+                </div>
+              </div>
+
+              {/* Contact Phone Input - Premium Design */}
+              <div className="bg-stone-50/40 dark:bg-stone-950/40 border border-stone-200/80 dark:border-stone-800 rounded-xl p-5 space-y-4">
+                <div>
+                  <h4 className="font-display font-bold text-xs uppercase tracking-wider text-stone-700 dark:text-stone-300">Información de Contacto</h4>
+                  <p className="text-[10px] text-stone-450 dark:text-stone-500 mt-1 font-semibold">Confirmá el número de teléfono celular donde los clientes te contactarán por WhatsApp.</p>
+                </div>
+                
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="contactPhone"
+                    maxLength={8}
+                    placeholder="Ej: 88888888"
+                    value={formData.contactPhone}
+                    onChange={handlePhoneChange}
+                    className="w-full rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950 px-4 py-3 pl-10 text-xs focus:outline-none focus:border-primary text-stone-850 dark:text-stone-100 font-mono tracking-wider"
+                  />
+                  <Phone className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-stone-400" />
                 </div>
               </div>
 

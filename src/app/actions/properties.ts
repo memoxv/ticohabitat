@@ -164,6 +164,26 @@ export async function createPropertyAction(data: PropertySubmitData) {
       };
     }
 
+    // Self-healing: save phone to User model if user doesn't have one set or has a different one
+    if (phoneInput && (!(dbUser as any).phone || (dbUser as any).phone !== phoneInput)) {
+      await db.user.update({
+        where: { id: resolvedUserId },
+        data: { phone: phoneInput },
+      });
+      // Also register it as verified in PhoneVerification to avoid duplicate account registrations
+      await db.phoneVerification.upsert({
+        where: { phone: phoneInput },
+        update: { verified: true },
+        create: {
+          phone: phoneInput,
+          code: '123456',
+          expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+          verified: true,
+        },
+      });
+      console.log(`[Self-Healing] Saved phone ${phoneInput} to user ${resolvedUserId}`);
+    }
+
     const whatsappUrl = `https://wa.me/506${phoneInput}`;
 
     // Validate and clean features contextual to this property type
@@ -602,6 +622,30 @@ export async function updatePropertyAction(propertyId: string, data: PropertySub
         success: false,
         message: 'Debe ingresar un número de teléfono celular de 8 dígitos para actualizar la propiedad.',
       };
+    }
+
+    // Self-healing: save phone to User model if user doesn't have one set or has a different one
+    const dbUserForPhone = await db.user.findUnique({
+      where: { id: session.userId },
+      select: { phone: true }
+    });
+    if (phoneInput && (!(dbUserForPhone as any)?.phone || (dbUserForPhone as any).phone !== phoneInput)) {
+      await db.user.update({
+        where: { id: session.userId },
+        data: { phone: phoneInput },
+      });
+      // Also register it as verified in PhoneVerification to avoid duplicate account registrations
+      await db.phoneVerification.upsert({
+        where: { phone: phoneInput },
+        update: { verified: true },
+        create: {
+          phone: phoneInput,
+          code: '123456',
+          expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+          verified: true,
+        },
+      });
+      console.log(`[Self-Healing] Saved phone ${phoneInput} to user ${session.userId} during edit`);
     }
 
     const whatsappUrl = `https://wa.me/506${phoneInput}`;

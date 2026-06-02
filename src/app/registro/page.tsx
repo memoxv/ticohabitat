@@ -26,28 +26,30 @@ export default function RegistroPage() {
       return;
     }
 
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length !== 8) {
+      showToast('Por favor ingresa un número de teléfono celular válido de 8 dígitos.', 'error');
+      return;
+    }
+
     setSubmitting(true);
     setPhoneInUseError(false);
 
-    // If phone is provided, check if it's already in use
-    if (phone) {
-      const isUsed = await isPhoneAlreadyUsedAction(phone);
-      if (isUsed.exists) {
-        setPhoneInUseError(true);
-        setDuplicatePhone(phone);
-        showToast('El número de teléfono ya ha sido registrado en otra cuenta.', 'error');
-        setSubmitting(false);
-        return;
-      }
+    // Check if phone is already in use
+    const isUsed = await isPhoneAlreadyUsedAction(cleanPhone);
+    if (isUsed.exists) {
+      setPhoneInUseError(true);
+      setDuplicatePhone(cleanPhone);
+      showToast('El número de teléfono ya ha sido registrado en otra cuenta.', 'error');
+      setSubmitting(false);
+      return;
     }
     
     // Simulate user creation and automatic login
-    const sessionUser = await login(email, 'USER', phone || undefined, name, password, true);
+    const sessionUser = await login(email, 'USER', cleanPhone, name, password, true);
     
-    // If phone was provided, pre-verify in session context to keep development extremely frictionless!
-    if (phone) {
-      verifyPhoneInSession(phone);
-    }
+    // Pre-verify in session context to keep development extremely frictionless!
+    verifyPhoneInSession(cleanPhone);
     
     // Trigger automated email verification dispatch!
     if (sessionUser) {
@@ -158,7 +160,7 @@ export default function RegistroPage() {
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">Teléfono Móvil (Opcional)</label>
+              <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">Teléfono Móvil (Obligatorio)</label>
               <div className="relative">
                 <input
                   type="text"

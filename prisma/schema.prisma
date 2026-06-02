@@ -12,6 +12,7 @@ model User {
   id        String     @id @default(uuid())
   email     String     @unique
   name      String?
+  phone     String?    // Teléfono celular guardado del usuario
   password  String     // hashed or plain simple password for MVP
   role      String     @default("USER") // USER, ADMIN
   createdAt DateTime   @default(now())

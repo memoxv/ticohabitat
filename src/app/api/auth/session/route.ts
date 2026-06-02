@@ -53,17 +53,19 @@ export async function POST(req: NextRequest) {
           ? data.name
           : undefined,
         role: assignedRole,
+        phone: data.isSignUp && data.verifiedPhone ? data.verifiedPhone.replace(/\D/g, '') : undefined,
       },
       create: {
         email: data.email,
         name: data.name || 'Usuario Costa Rica',
         password: hashedPassword,
         role: assignedRole,
+        phone: data.verifiedPhone ? data.verifiedPhone.replace(/\D/g, '') : null,
       },
     });
     
     // Verify that the phone is indeed verified in the database to prevent spoofing exploits!
-    let verifiedPhone: string | null = null;
+    let verifiedPhone: string | null = (existingUser as any)?.phone || null;
     if (data.verifiedPhone) {
       const cleanPhone = data.verifiedPhone.replace(/\D/g, '');
       if (data.isSignUp) {
