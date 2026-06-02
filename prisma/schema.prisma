@@ -96,6 +96,12 @@ model Property {
   favorites     Favorite[]
   reports       Report[]
   fingerprints  PropertyFingerprint[]
+
+  @@index([userId])
+  @@index([status, type, province])
+  @@index([status, type, propertyType])
+  @@index([status, type, price])
+  @@index([status, featured, createdAt])
 }
 
 model PropertyImage {

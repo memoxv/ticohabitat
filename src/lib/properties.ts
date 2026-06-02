@@ -196,10 +196,10 @@ export async function getProperties(filters: PropertyFilters) {
   // Simple text search (title / description)
   if (search) {
     where.OR = [
-      { title: { contains: search } },
-      { description: { contains: search } },
-      { canton: { contains: search } },
-      { district: { contains: search } },
+      { title: { contains: search, mode: 'insensitive' } },
+      { description: { contains: search, mode: 'insensitive' } },
+      { canton: { contains: search, mode: 'insensitive' } },
+      { district: { contains: search, mode: 'insensitive' } },
     ];
   }
 
