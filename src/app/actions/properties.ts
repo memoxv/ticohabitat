@@ -71,6 +71,18 @@ export async function createPropertyAction(data: PropertySubmitData) {
       console.log(`[Self-Healing] Created legacy session user in DB: ${session.email} (${session.userId})`);
     }
 
+    // 0.6. Enforce account name sync with database
+    if (session.name) {
+      const isDefaultName = !dbUser.name || dbUser.name === 'Usuario Costa Rica' || dbUser.name === 'Usuario TicoHabitat';
+      if (dbUser.name !== session.name || isDefaultName) {
+        dbUser = await db.user.update({
+          where: { id: dbUser.id },
+          data: { name: session.name },
+        });
+        console.log(`[Self-Healing] Updated user name in DB to match session: ${session.name}`);
+      }
+    }
+
     const resolvedUserId = dbUser.id;
 
     // 0.5. Check property limit based on user plan: FREE plan is limited to 3 properties
@@ -141,12 +153,19 @@ export async function createPropertyAction(data: PropertySubmitData) {
     const uniqueSuffix = Math.random().toString(36).substring(2, 6);
     const slug = `${baseSlug}-${uniqueSuffix}`;
 
-    // Defensive variables for phone and whatsapp to avoid starting errors
-    const phoneInput = data.contactPhone || '';
-    const whatsappInput = data.whatsapp || phoneInput;
-    const whatsappUrl = whatsappInput.startsWith('http')
-      ? whatsappInput
-      : `https://wa.me/506${whatsappInput.replace(/\D/g, '')}`;
+    // Enforce the phone number from the session / account if available
+    const accountPhone = session.verifiedPhone || data.contactPhone || '';
+    const cleanDigits = accountPhone.replace(/\D/g, '');
+    const phoneInput = cleanDigits.slice(-8); // Get last 8 digits (Costa Rican standard)
+
+    if (phoneInput.length !== 8) {
+      return {
+        success: false,
+        message: 'Debe contar con un número de teléfono celular verificado de 8 dígitos para publicar la propiedad.',
+      };
+    }
+
+    const whatsappUrl = `https://wa.me/506${phoneInput}`;
 
     // Validate and clean features contextual to this property type
     const validatedFeatures = validateFeaturesForType(data.propertyType, data.features || []);
@@ -545,6 +564,38 @@ export async function updatePropertyAction(propertyId: string, data: PropertySub
       return { success: false, message: 'No tiene permisos para modificar esta propiedad.' };
     }
 
+    // Enforce name sync in DB
+    if (session.name) {
+      const dbUser = await db.user.findUnique({
+        where: { id: session.userId },
+        select: { name: true }
+      });
+      if (dbUser) {
+        const isDefaultName = !dbUser.name || dbUser.name === 'Usuario Costa Rica' || dbUser.name === 'Usuario TicoHabitat';
+        if (dbUser.name !== session.name || isDefaultName) {
+          await db.user.update({
+            where: { id: session.userId },
+            data: { name: session.name },
+          });
+          console.log(`[Self-Healing] Updated user name in DB to match session during edit: ${session.name}`);
+        }
+      }
+    }
+
+    // Enforce the phone number from the session / account if available
+    const accountPhone = session.verifiedPhone || data.contactPhone || '';
+    const cleanDigits = accountPhone.replace(/\D/g, '');
+    const phoneInput = cleanDigits.slice(-8); // Get last 8 digits (Costa Rican standard)
+
+    if (phoneInput.length !== 8) {
+      return {
+        success: false,
+        message: 'Debe contar con un número de teléfono celular verificado de 8 dígitos para actualizar la propiedad.',
+      };
+    }
+
+    const whatsappUrl = `https://wa.me/506${phoneInput}`;
+
     // 2. Perform database update
     await db.$transaction(async (tx) => {
       await tx.property.update({
@@ -566,8 +617,8 @@ export async function updatePropertyAction(propertyId: string, data: PropertySub
           petsAllowed: data.petsAllowed,
           furnished: data.furnished,
           condominium: data.condominium,
-          contactPhone: data.contactPhone,
-          whatsapp: data.whatsapp,
+          contactPhone: phoneInput,
+          whatsapp: whatsappUrl,
           features: JSON.stringify(data.features || []),
         },
       });

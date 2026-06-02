@@ -51,10 +51,16 @@ export default function PropertyCard({ property }: { property: PropertyCardProps
   if (property.parkingSpaces > 0) specsArray.push(`${property.parkingSpaces} ${property.parkingSpaces === 1 ? 'parq' : 'parqs'}`);
   const specsText = specsArray.join(' · ');
 
+  const cleanPhoneDigits = (property.whatsapp || property.contactPhone || '').replace(/\D/g, '');
+  const hasContactPhone = cleanPhoneDigits.slice(-8).length === 8;
+  const cleanPhone = cleanPhoneDigits.slice(-8);
+
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
+    if (!hasContactPhone) return;
+
     // Track click on WhatsApp
     fetch('/api/metrics', {
       method: 'POST',
@@ -62,9 +68,6 @@ export default function PropertyCard({ property }: { property: PropertyCardProps
       body: JSON.stringify({ event: 'whatsapp_click', propertyId: property.id }),
     }).catch(console.error);
 
-    // Form Costa Rican WhatsApp link using registered WhatsApp number (or contactPhone as fallback)
-    const targetPhone = property.whatsapp || property.contactPhone;
-    const cleanPhone = targetPhone.replace(/\D/g, '').slice(-8);
     const text = `Hola! Me interesa tu anuncio de ${propertyTypeLabel} en TicoHabitat: ${property.title} (Link: https://ticohabitat.com/propiedad/${property.slug})`;
     const waUrl = `https://wa.me/506${cleanPhone}?text=${encodeURIComponent(text)}`;
     window.open(waUrl, '_blank');
@@ -196,26 +199,28 @@ export default function PropertyCard({ property }: { property: PropertyCardProps
             {property.petsAllowed && ' · 🐾'}
           </span>
 
-          <div className="flex items-center gap-1.5 shrink-0">
-            {/* Direct Call Button (Sleek circular icon button) */}
-            <a
-              href={`tel:+506${property.contactPhone.replace(/\D/g, '')}`}
-              onClick={handlePhoneClick}
-              className="w-8 h-8 rounded-full border border-stone-250 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-900/50 cursor-pointer flex items-center justify-center transition-all active:scale-90"
-              title="Llamar directamente"
-            >
-              <Phone className="h-3.5 w-3.5 text-stone-400 dark:text-stone-500" />
-            </a>
+          {hasContactPhone && (
+            <div className="flex items-center gap-1.5 shrink-0">
+              {/* Direct Call Button (Sleek circular icon button) */}
+              <a
+                href={`tel:+506${cleanPhone}`}
+                onClick={handlePhoneClick}
+                className="w-8 h-8 rounded-full border border-stone-250 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-900/50 cursor-pointer flex items-center justify-center transition-all active:scale-90"
+                title="Llamar directamente"
+              >
+                <Phone className="h-3.5 w-3.5 text-stone-400 dark:text-stone-500" />
+              </a>
 
-            {/* Contact WhatsApp Button (Sleek emerald circular CTA) */}
-            <button
-              onClick={handleWhatsAppClick}
-              className="w-8 h-8 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer flex items-center justify-center active:scale-90 shadow-sm transition-all duration-300"
-              title="Contactar por WhatsApp"
-            >
-              <MessageSquare className="h-3.5 w-3.5" />
-            </button>
-          </div>
+              {/* Contact WhatsApp Button (Sleek emerald circular CTA) */}
+              <button
+                onClick={handleWhatsAppClick}
+                className="w-8 h-8 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer flex items-center justify-center active:scale-90 shadow-sm transition-all duration-300"
+                title="Contactar por WhatsApp"
+              >
+                <MessageSquare className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

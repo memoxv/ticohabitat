@@ -62,8 +62,12 @@ export default function PropertyDetailsClient({ property }: PropertyDetailsClien
     }).catch(console.error);
 
     // Form Costa Rican WhatsApp link using the registered WhatsApp number (or contactPhone as fallback)
-    const targetPhone = property.whatsapp || property.contactPhone;
+    const targetPhone = property.whatsapp || property.contactPhone || '';
     const cleanPhone = targetPhone.replace(/\D/g, '').slice(-8);
+    if (cleanPhone.length !== 8) {
+      showToast('Esta propiedad no cuenta con un número de WhatsApp verificado de 8 dígitos.', 'error');
+      return;
+    }
     const text = `Hola! Vi tu anuncio de ${propertyTypeLabel} en TicoHabitat: "${property.title}". ¿Sigue disponible? (Enlace: https://ticohabitat.com/propiedad/${property.slug})`;
     const waUrl = `https://wa.me/506${cleanPhone}?text=${encodeURIComponent(text)}`;
     window.open(waUrl, '_blank');
@@ -95,31 +99,38 @@ export default function PropertyDetailsClient({ property }: PropertyDetailsClien
     }
   };
 
+  const cleanPhoneDigits = (property.whatsapp || property.contactPhone || '').replace(/\D/g, '');
+  const hasContactPhone = cleanPhoneDigits.slice(-8).length === 8;
+
   return (
     <div className="flex flex-col gap-6">      {/* Dynamic Action Area with perfect vertical stacking for sidebars */}
       <div className="flex flex-col gap-3 w-full">
         {/* Giant WhatsApp Conversion Button */}
-        <button
-          onClick={handleWhatsAppClick}
-          className="group relative w-full flex items-center justify-between rounded-full bg-emerald-600 hover:bg-emerald-500 text-white pl-6 pr-2 py-2 text-xs font-black transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer shadow-[0_12px_24px_-8px_rgba(16,185,129,0.3)] hover:shadow-[0_16px_28px_-6px_rgba(16,185,129,0.4)] active:scale-[0.97] outline-none"
-        >
-          <span>Contactar por WhatsApp</span>
-          <div className="w-8 h-8 rounded-full bg-white/15 dark:bg-white/20 flex items-center justify-center text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
-            <MessageSquare className="h-4 w-4 shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-12" />
-          </div>
-        </button>
+        {hasContactPhone && (
+          <button
+            onClick={handleWhatsAppClick}
+            className="group relative w-full flex items-center justify-between rounded-full bg-emerald-600 hover:bg-emerald-500 text-white pl-6 pr-2 py-2 text-xs font-black transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer shadow-[0_12px_24px_-8px_rgba(16,185,129,0.3)] hover:shadow-[0_16px_28px_-6px_rgba(16,185,129,0.4)] active:scale-[0.97] outline-none"
+          >
+            <span>Contactar por WhatsApp</span>
+            <div className="w-8 h-8 rounded-full bg-white/15 dark:bg-white/20 flex items-center justify-center text-white transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+              <MessageSquare className="h-4 w-4 shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-12" />
+            </div>
+          </button>
+        )}
 
         {/* Giant Direct Call Button */}
-        <a
-          href={`tel:+506${property.contactPhone.replace(/\D/g, '')}`}
-          onClick={handlePhoneClick}
-          className="group relative w-full flex items-center justify-between rounded-full bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-900 dark:text-stone-150 pl-6 pr-2 py-2 text-xs font-black transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer shadow-[0_12px_24px_-8px_rgba(0,0,0,0.08)] active:scale-[0.97] outline-none border border-stone-250 dark:border-stone-750/60"
-        >
-          <span>Llamar por Teléfono</span>
-          <div className="w-8 h-8 rounded-full bg-stone-200/50 dark:bg-stone-700/50 flex items-center justify-center text-stone-750 dark:text-stone-300 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
-            <Phone className="h-4 w-4 shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-12" />
-          </div>
-        </a>
+        {hasContactPhone && (
+          <a
+            href={`tel:+506${cleanPhoneDigits.slice(-8)}`}
+            onClick={handlePhoneClick}
+            className="group relative w-full flex items-center justify-between rounded-full bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-900 dark:text-stone-150 pl-6 pr-2 py-2 text-xs font-black transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer shadow-[0_12px_24px_-8px_rgba(0,0,0,0.08)] active:scale-[0.97] outline-none border border-stone-250 dark:border-stone-750/60"
+          >
+            <span>Llamar por Teléfono</span>
+            <div className="w-8 h-8 rounded-full bg-stone-200/50 dark:bg-stone-700/50 flex items-center justify-center text-stone-750 dark:text-stone-300 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+              <Phone className="h-4 w-4 shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-12" />
+            </div>
+          </a>
+        )}
 
         {/* Supplementary Row: Favorites & Report */}
         <div className="flex items-center gap-2 mt-1">

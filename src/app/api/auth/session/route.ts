@@ -48,7 +48,10 @@ export async function POST(req: NextRequest) {
     const dbUser = await db.user.upsert({
       where: { email: data.email },
       update: {
-        name: data.name || undefined,
+        // Only update name on signup or if data.name is custom (not default placeholder)
+        name: data.isSignUp && data.name && data.name !== 'Usuario Costa Rica' && data.name !== 'Usuario TicoHabitat'
+          ? data.name
+          : undefined,
         role: assignedRole,
       },
       create: {

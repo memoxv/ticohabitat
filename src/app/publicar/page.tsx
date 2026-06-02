@@ -191,14 +191,14 @@ export default function PublicarPage() {
   }, [formData.propertyType]);
 
   useEffect(() => {
-    if (phoneVerified && !formData.contactPhone) {
+    if (phoneVerified) {
       setFormData((prev) => ({
         ...prev,
         contactPhone: phoneVerified,
         whatsapp: phoneVerified,
       }));
     }
-  }, [phoneVerified, formData.contactPhone]);
+  }, [phoneVerified]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -683,6 +683,105 @@ export default function PublicarPage() {
                 )}
               </div>
 
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (user && !phoneVerified) {
+    return (
+      <div className="flex-grow bg-stone-50/20 dark:bg-stone-950/20 py-20 flex items-center justify-center animate-fadeIn">
+        <div className="max-w-md w-full px-6">
+          <div className="bg-white dark:bg-stone-900 border border-stone-250/70 dark:border-stone-800 rounded-2xl p-8 shadow-sm space-y-6 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-350 border border-emerald-250/30 dark:border-emerald-900/30">
+              <Phone className="h-6 w-6 text-emerald-600 dark:text-emerald-500" />
+            </div>
+
+            <div className="space-y-2">
+              <h2 className="font-display text-2xl font-extrabold text-stone-900 dark:text-white tracking-tight">Verificá tu Teléfono Móvil</h2>
+              <p className="text-xs text-stone-550 dark:text-stone-400 font-semibold leading-relaxed">
+                Para publicar en TicoHabitat, debés contar con un número de teléfono móvil de Costa Rica verificado por WhatsApp OTP. Esto previene spam y duplicaciones.
+              </p>
+            </div>
+
+            {/* Dev helper drawer */}
+            {process.env.NODE_ENV !== 'production' && devOtpLog && (
+              <div className="border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-950/60 text-stone-700 dark:text-stone-300 rounded-xl p-5 text-xs max-w-sm mx-auto flex flex-col items-center gap-2.5 shadow-inner">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-450 tracking-wider uppercase">
+                  <Sparkles className="h-4 w-4 animate-pulse text-amber-500" />
+                  <span>WhatsApp OTP Simulador Bot:</span>
+                </div>
+                <div className="text-center font-medium">Código OTP enviado por WhatsApp:</div>
+                <div className="text-2xl font-mono tracking-widest font-black text-stone-950 dark:text-stone-100 bg-white dark:bg-stone-900 px-4.5 py-1.5 rounded border border-stone-200 dark:border-stone-850 shadow-inner mt-1">
+                  {devOtpLog}
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-4 pt-2 text-left">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-extrabold uppercase tracking-wider text-stone-450 dark:text-stone-550">Número de Teléfono Móvil (8 dígitos)</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Ej: 88888888"
+                    value={formData.contactPhone}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '').slice(0, 8);
+                      setFormData((prev) => ({
+                        ...prev,
+                        contactPhone: val,
+                        whatsapp: val,
+                      }));
+                    }}
+                    className="input-premium w-full py-3 pl-10 text-xs font-mono"
+                  />
+                  <Phone className="absolute left-3.5 top-3.5 h-4 w-4 text-stone-400" />
+                </div>
+              </div>
+
+              {!devOtpLog ? (
+                <button
+                  type="button"
+                  onClick={handleRequestOtp}
+                  disabled={sendingOtp || formData.contactPhone.length < 8}
+                  className="btn-primary w-full py-3.5 text-xs cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+                >
+                  {sendingOtp ? 'Enviando OTP...' : 'Solicitar Código por WhatsApp'}
+                </button>
+              ) : (
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    maxLength={6}
+                    placeholder="Introduce el código OTP de 6 dígitos"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                    className="input-premium py-3 text-center font-mono tracking-widest"
+                  />
+
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleRequestOtp}
+                      disabled={sendingOtp}
+                      className="btn-secondary flex-1 py-3 text-xs cursor-pointer disabled:opacity-50"
+                    >
+                      Reenviar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleVerifyOtpSubmit}
+                      disabled={verifyingOtp || otpCode.length < 6}
+                      className="btn-primary flex-1 py-3 text-xs cursor-pointer disabled:opacity-50"
+                    >
+                      {verifyingOtp ? 'Verificando...' : 'Verificar OTP'}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

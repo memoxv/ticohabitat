@@ -6,6 +6,8 @@ import { getRandomFeaturedPropertiesAction } from '@/lib/properties';
 import { db } from '@/lib/db';
 import FeaturedCarousel from '@/components/FeaturedCarousel';
 
+export const revalidate = 0; // Fresh content always
+
 export const metadata: Metadata = {
   title: 'Comprar Propiedades en Costa Rica | TicoHabitat',
   description: 'Encuentre casas, apartamentos, lotes y quintas en venta en Costa Rica. Trato directo con el propietario, verificación OTP celular y libre de intermediarios.',

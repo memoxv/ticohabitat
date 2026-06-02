@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { runAutoExpirationSweep } from '@/lib/properties';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/featured
  * Returns ALL active featured properties for democratic carousel rotation.

@@ -6,6 +6,8 @@ import { getRandomFeaturedPropertiesAction } from '@/lib/properties';
 import { db } from '@/lib/db';
 import FeaturedCarousel from '@/components/FeaturedCarousel';
 
+export const revalidate = 0; // Fresh content always
+
 export const metadata: Metadata = {
   title: 'Alquiler de Propiedades en Costa Rica | TicoHabitat',
   description: 'Descubra casas, apartamentos, cuartos y locales en alquiler en Costa Rica. Trato directo, verificación OTP contra spam y entorno 100% confiable.',
