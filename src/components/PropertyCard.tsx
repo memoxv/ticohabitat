@@ -78,7 +78,13 @@ export default function PropertyCard({ property }: { property: PropertyCardProps
       body: JSON.stringify({ event: 'whatsapp_click', propertyId: property.id }),
     }).catch(console.error);
 
-    const text = `Hola! Me interesa tu anuncio de ${propertyTypeLabel} en TicoHabitat: ${property.title} (Link: https://ticohabitat.com/propiedad/${property.slug})`;
+    const priceText = property.currency === 'USD'
+      ? `$${property.price.toLocaleString('en-US')}`
+      : `₡${property.price.toLocaleString('es-CR')}`;
+    const locationText = property.canton
+      ? `${property.province}, ${property.canton}`
+      : property.province;
+    const text = `👋 *¡Hola!*\n\nVi tu anuncio en *TicoHabitat* 🏡\n👉 *${propertyTypeLabel}:* ${property.title}\n💰 *Precio:* ${priceText}\n📍 *Ubicación:* ${locationText}\n\n¿Sigue disponible para coordinar una visita?\n\n🔗 *Enlace:* https://ticohabitat.com/propiedad/${property.slug}`;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const waUrl = isMobile 
       ? `whatsapp://send?phone=506${cleanPhone}&text=${encodeURIComponent(text)}`
