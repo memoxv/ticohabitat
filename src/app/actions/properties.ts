@@ -468,7 +468,8 @@ export async function getUserPropertiesCountAction() {
       },
     });
 
-    return { success: true, count, role: dbUser.role, planType: dbUser.planType };
+    const effectivePlan = await getUserEffectivePlan(dbUser.id);
+    return { success: true, count, role: dbUser.role, planType: effectivePlan.planType };
   } catch (e) {
     return { success: false, count: 0, role: 'USER', planType: 'FREE' };
   }

@@ -204,13 +204,11 @@ export async function getPropertyFeaturedStatus(propertyId: string) {
       },
     });
 
-    // Get user details
-    const dbUser = await db.user.findUnique({
-      where: { id: session.userId },
-      select: { planType: true },
-    });
+    // Get user effective plan details (handling inheritance for agency agents)
+    const { getUserEffectivePlan } = await import('@/lib/planInheritance');
+    const effectivePlan = await getUserEffectivePlan(session.userId);
 
-    const planType = dbUser?.planType || 'FREE';
+    const planType = effectivePlan.planType || 'FREE';
     const maxFeatured = planType === 'PREMIUM' ? 3 : planType === 'AGENCY' ? 8 : 0;
 
     // Count currently active featured properties for this user
@@ -268,12 +266,10 @@ export async function activateFreeFeaturedAction(propertyId: string, durationDay
       return { success: false, message: 'No tiene permisos para modificar esta propiedad.' };
     }
 
-    const dbUser = await db.user.findUnique({
-      where: { id: session.userId },
-      select: { planType: true },
-    });
+    const { getUserEffectivePlan } = await import('@/lib/planInheritance');
+    const effectivePlan = await getUserEffectivePlan(session.userId);
 
-    const planType = dbUser?.planType || 'FREE';
+    const planType = effectivePlan.planType || 'FREE';
     const maxFeatured = planType === 'PREMIUM' ? 3 : planType === 'AGENCY' ? 8 : 0;
 
     // Count currently active featured properties for this user
