@@ -113,7 +113,7 @@ export default function PublicarPage() {
   const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [devOtpLog, setDevOtpLog] = useState<string | null>(null); // Dev helper drawer
   const [isSubmittingProperty, setIsSubmittingProperty] = useState(false);
-  
+
   // Email verification state variables for testing
   const [sendingEmail, setSendingEmail] = useState(false);
   const [emailVerificationLink, setEmailVerificationLink] = useState<string | null>(null);
@@ -204,7 +204,7 @@ export default function PublicarPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    
+
     let finalValue: any = value;
     if (type === 'checkbox') {
       finalValue = (e.target as HTMLInputElement).checked;
@@ -340,7 +340,7 @@ export default function PublicarPage() {
   const setAsCover = (idx: number) => {
     const list = [...(formData.imageUrls || [])];
     if (idx <= 0 || idx >= list.length) return;
-    
+
     // Remove element and put it at index 0
     const [target] = list.splice(idx, 1);
     list.unshift(target);
@@ -504,7 +504,7 @@ export default function PublicarPage() {
     }
 
     setIsSubmittingProperty(true);
-    
+
     // Call publish Server Action
     const res = await createPropertyAction(formData);
 
@@ -538,7 +538,7 @@ export default function PublicarPage() {
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-stone-100 dark:bg-stone-850 text-stone-750 dark:text-stone-200 border border-stone-200/40 dark:border-stone-800">
               <KeyRound className="h-6 w-6 text-stone-500 dark:text-stone-400" />
             </div>
-            
+
             <div className="space-y-2">
               <h2 className="font-display text-2xl font-extrabold text-stone-900 dark:text-white tracking-tight">Registro Requerido</h2>
               <p className="text-xs text-stone-550 dark:text-stone-400 font-bold leading-relaxed">
@@ -615,7 +615,7 @@ export default function PublicarPage() {
 
             {/* Main Validation Options */}
             <div className="space-y-4 pt-2">
-              
+
               {/* Option A: Click Validation Link */}
               <div className="space-y-2">
                 <button
@@ -708,7 +708,7 @@ export default function PublicarPage() {
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-300 border border-red-200/30 dark:border-red-900/30">
               <Sparkles className="h-6 w-6 text-red-600 dark:text-red-400" />
             </div>
-            
+
             <div className="space-y-2">
               <h2 className="font-display text-2xl font-extrabold text-stone-900 dark:text-white tracking-tight">Límite de Anuncios</h2>
               <p className="text-xs text-stone-550 dark:text-stone-400 font-bold leading-relaxed">
@@ -749,14 +749,14 @@ export default function PublicarPage() {
   return (
     <div className="flex-grow bg-stone-50/20 dark:bg-stone-950/20 py-16">
       <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
-        
+
         {/* Step Indicator Panel - Beautifully Refactored Progress Bar */}
         <div className="mb-10">
           <div className="flex items-center justify-between text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest mb-3">
             <span>Paso {step} de 4</span>
             <span className="text-primary font-black">{Math.round(((step - 1) / 3) * 100)}% Completado</span>
           </div>
-          
+
           <div className="h-[3px] w-full bg-stone-200 dark:bg-stone-850 rounded-full overflow-hidden">
             <div
               className="h-full bg-primary transition-all duration-300 rounded-full"
@@ -774,7 +774,7 @@ export default function PublicarPage() {
 
         {/* Wizard Container Card */}
         <div className="bg-white dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 rounded-xl p-6 sm:p-8 shadow-sm">
-          
+
           {/* STEP 1: Basic properties */}
           {step === 1 && (
             <div className="space-y-6 animate-fadeIn">
@@ -788,11 +788,10 @@ export default function PublicarPage() {
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, type: 'rent' })}
-                  className={`flex flex-col items-center justify-center p-6.5 rounded-xl border-2 text-center transition-all duration-200 active:scale-[0.985] cursor-pointer ${
-                    formData.type === 'rent'
+                  className={`flex flex-col items-center justify-center p-6.5 rounded-xl border-2 text-center transition-all duration-200 active:scale-[0.985] cursor-pointer ${formData.type === 'rent'
                       ? 'border-primary bg-primary-light/10 dark:bg-primary-light/5 text-stone-900 dark:text-white shadow-sm'
                       : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-450 hover:border-stone-300'
-                  }`}
+                    }`}
                 >
                   <span className="font-display font-black text-base">Alquilar</span>
                   <span className="text-[9px] font-bold text-stone-450 dark:text-stone-500 mt-1.5 uppercase tracking-wider">Mensualidad regular</span>
@@ -801,11 +800,10 @@ export default function PublicarPage() {
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, type: 'buy' })}
-                  className={`flex flex-col items-center justify-center p-6.5 rounded-xl border-2 text-center transition-all duration-200 active:scale-[0.985] cursor-pointer ${
-                    formData.type === 'buy'
+                  className={`flex flex-col items-center justify-center p-6.5 rounded-xl border-2 text-center transition-all duration-200 active:scale-[0.985] cursor-pointer ${formData.type === 'buy'
                       ? 'border-primary bg-primary-light/10 dark:bg-primary-light/5 text-stone-900 dark:text-white shadow-sm'
                       : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-450 hover:border-stone-300'
-                  }`}
+                    }`}
                 >
                   <span className="font-display font-black text-base">Vender</span>
                   <span className="text-[9px] font-bold text-stone-450 dark:text-stone-500 mt-1.5 uppercase tracking-wider">Traspaso absoluto</span>
@@ -903,14 +901,13 @@ export default function PublicarPage() {
                 />
               </div>
 
-              <div className={`grid ${
-                formData.propertyType === 'lot'
+              <div className={`grid ${formData.propertyType === 'lot'
                   ? 'grid-cols-1 max-w-xs mx-auto'
                   : formData.propertyType === 'commercial'
                     ? 'grid-cols-3'
                     : 'grid-cols-2 sm:grid-cols-4'
-              } gap-3`}>
-                
+                } gap-3`}>
+
                 {formData.propertyType !== 'lot' && formData.propertyType !== 'commercial' && (
                   <div>
                     <label className="block text-[9px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2 text-center">Habitaciones</label>
@@ -973,7 +970,7 @@ export default function PublicarPage() {
                   {Object.entries(groupFeaturesByCategory(formData.propertyType)).map(([categoryKey, featureList]) => {
                     // Filter features based on isPrimary or showAllFeatures state
                     const visibleFeatures = featureList.filter(f => f.isPrimary || showAllFeatures);
-                    
+
                     if (visibleFeatures.length === 0) return null;
 
                     return (
@@ -981,7 +978,7 @@ export default function PublicarPage() {
                         <h4 className="text-[9px] font-black uppercase tracking-wider text-stone-400 dark:text-stone-550">
                           {FEATURE_CATEGORIES[categoryKey]}
                         </h4>
-                        
+
                         <div className="flex flex-wrap gap-2">
                           {visibleFeatures.map((feat) => {
                             const isChecked = (formData.features || []).includes(feat.key);
@@ -990,11 +987,10 @@ export default function PublicarPage() {
                                 key={feat.key}
                                 type="button"
                                 onClick={() => handleToggleFeature(feat.key)}
-                                className={`flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-bold transition-all cursor-pointer select-none active:scale-[0.97] ${
-                                  isChecked
+                                className={`flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-bold transition-all cursor-pointer select-none active:scale-[0.97] ${isChecked
                                     ? 'bg-primary-light/45 border-primary text-primary dark:bg-primary-light/10 shadow-sm'
                                     : 'bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-stone-650 dark:text-stone-405 hover:border-stone-300'
-                                }`}
+                                  }`}
                               >
                                 {isChecked && <Check className="h-3.5 w-3.5 shrink-0" />}
                                 <span>{feat.label}</span>
@@ -1077,7 +1073,7 @@ export default function PublicarPage() {
                     <h3 className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">
                       Imágenes Cargadas ({formData.imageUrls.length} de 15)
                     </h3>
-                    
+
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                       {formData.imageUrls.map((url, idx) => (
                         <div
@@ -1090,7 +1086,7 @@ export default function PublicarPage() {
                             alt={`Preview ${idx + 1}`}
                             className="h-full w-full object-cover"
                           />
-                          
+
                           {/* Portada indicator */}
                           {idx === 0 ? (
                             <span className="absolute top-2 left-2 z-10 bg-primary text-white text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded shadow">
@@ -1176,7 +1172,7 @@ export default function PublicarPage() {
                   </div>
                   <h3 className="font-display font-bold text-base text-stone-850 dark:text-stone-100">{formData.title || 'Propiedad sin título'}</h3>
                   <p className="text-xs text-stone-450 font-bold">{formData.province}</p>
-                  
+
                   <div className="flex items-center gap-3 text-[10px] text-stone-400 dark:text-stone-500 font-bold uppercase tracking-wider border-t border-stone-150 dark:border-stone-800/40 pt-3">
                     {formData.propertyType !== 'lot' && formData.propertyType !== 'commercial' && (
                       <>
@@ -1207,11 +1203,11 @@ export default function PublicarPage() {
                   <h4 className="font-display font-bold text-xs uppercase tracking-wider text-stone-700 dark:text-stone-300">Información de Contacto</h4>
                   <p className="text-[10px] text-stone-450 dark:text-stone-500 mt-1 font-semibold">El anuncio se enlazará a tu número de teléfono registrado. Para cambiarlo, debes contactar a soporte.</p>
                 </div>
-                
+
                 <div className="flex items-center gap-3 bg-white dark:bg-stone-900 px-4 py-3 rounded-lg border border-stone-200 dark:border-stone-800">
                   <Phone className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-500" />
                   <span className="text-xs font-mono font-bold tracking-wider text-stone-850 dark:text-stone-100">
-                    +{phoneVerified || formData.contactPhone || 'No registrado'}
+                    {phoneVerified || formData.contactPhone || 'No registrado'}
                   </span>
                   <span className="ml-auto text-[9px] font-extrabold bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-250/20 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded uppercase tracking-wider">
                     Verificado y Enlazado
