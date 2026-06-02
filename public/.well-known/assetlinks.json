@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.ticohabitat.app",
+    "sha256_cert_fingerprints": ["81:E6:6F:36:CB:20:39:AC:BA:84:51:8B:AE:14:84:17:0D:49:16:B4:AC:ED:D1:10:D1:8A:15:AF:D5:EE:B5:9E"]
+  }
+}]
