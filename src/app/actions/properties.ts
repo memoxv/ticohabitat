@@ -390,17 +390,29 @@ export async function moderatePropertyAction(propertyId: string, action: 'approv
       return { success: true, message: 'Propiedad eliminada permanentemente.' };
     }
 
+
+
     if (action === 'feature') {
       const prop = await db.property.findUnique({ where: { id: propertyId } });
       const nextFeatured = !prop?.featured;
+      // Default to 30 days maximum duration for manual feature toggles, or null if disabling
+      const expirationDate = nextFeatured
+        ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        : null;
+
       await db.property.update({
         where: { id: propertyId },
         data: { 
           featured: nextFeatured,
-          featuredExpiresAt: null, // Clear expiration on manual toggle
+          featuredExpiresAt: expirationDate,
         },
       });
-      return { success: true, message: 'Estado Destacado modificado.' };
+      return { 
+        success: true, 
+        message: nextFeatured 
+          ? 'Anuncio destacado por 30 días.' 
+          : 'Destaque removido.' 
+      };
     }
 
     if (action === 'verify') {

@@ -84,6 +84,7 @@ export default async function AdminPage() {
             contactPhone: p.contactPhone,
             imageUrl: p.images?.[0]?.url,
             userEmail: p.user.email,
+            featuredExpiresAt: p.featuredExpiresAt,
           }))}
           initialReports={reports.map((r) => ({
             id: r.id,

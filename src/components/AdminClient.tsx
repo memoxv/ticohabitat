@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { moderatePropertyAction } from '@/app/actions/properties';
 import Link from 'next/link';
+
+
 import {
   FileText,
   AlertTriangle,
@@ -17,6 +19,8 @@ import {
   MessageSquare,
   ExternalLink,
   ShieldAlert,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 
 export interface DuplicateGroup {
@@ -35,6 +39,8 @@ export interface DuplicateGroup {
   }[];
 }
 
+
+
 interface AdminProperty {
   id: string;
   title: string;
@@ -48,6 +54,7 @@ interface AdminProperty {
   contactPhone: string;
   imageUrl?: string;
   userEmail: string;
+  featuredExpiresAt?: Date | string | null;
 }
 
 interface AdminReport {
@@ -93,6 +100,53 @@ export default function AdminClient({
   const [reports, setReports] = useState<AdminReport[]>(initialReports);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [duplicateGroups, setDuplicateGroups] = useState<DuplicateGroup[]>(initialDuplicateGroups);
+  
+
+
+  const [expandedUsers, setExpandedUsers] = useState<Record<string, boolean>>({});
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Filter properties by search term
+  const filteredProperties = React.useMemo(() => {
+    return properties.filter((prop) => {
+      const matchSearch = searchTerm
+        ? prop.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          prop.userEmail.toLowerCase().includes(searchTerm.toLowerCase())
+        : true;
+      return matchSearch;
+    });
+  }, [properties, searchTerm]);
+
+  // Group properties by user email
+  const groupedProperties = React.useMemo(() => {
+    return filteredProperties.reduce<Record<string, AdminProperty[]>>((acc, prop) => {
+      const email = prop.userEmail || 'Sin usuario';
+      if (!acc[email]) {
+        acc[email] = [];
+      }
+      acc[email].push(prop);
+      return acc;
+    }, {});
+  }, [filteredProperties]);
+
+  const toggleUserExpand = (email: string) => {
+    setExpandedUsers((prev) => ({
+      ...prev,
+      [email]: !prev[email],
+    }));
+  };
+
+  const handleExpandAll = () => {
+    const expanded: Record<string, boolean> = {};
+    Object.keys(groupedProperties).forEach((email) => {
+      expanded[email] = true;
+    });
+    setExpandedUsers(expanded);
+  };
+
+  const handleCollapseAll = () => {
+    setExpandedUsers({});
+  };
 
   const handleModerate = async (
     propertyId: string,
@@ -181,111 +235,214 @@ export default function AdminClient({
 
       {/* TAB 1: Moderación de Publicaciones */}
       {activeTab === 'moderation' && (
-        <div className="space-y-4 animate-fadeIn">
-          {properties.length === 0 ? (
+        <div className="space-y-6 animate-fadeIn">
+          
+          {/* Controls Bar: Search & Accordion Toggles */}
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-card-bg border border-card-border p-4 rounded-xl shadow-xs">
+            <div className="relative w-full sm:max-w-sm">
+              <input
+                type="text"
+                placeholder="Buscar por anunciante o título..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="input-premium w-full text-xs py-2 px-3 pl-9 bg-background border-card-border rounded-lg text-stone-900 dark:text-stone-150 font-semibold"
+              />
+              <span className="absolute left-3 top-2.5 text-stone-450 select-none">
+                🔍
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                onClick={handleExpandAll}
+                className="py-2 px-3 text-[10px] font-black uppercase tracking-wider bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-900 dark:text-stone-150 rounded-lg transition-colors cursor-pointer"
+              >
+                Expandir todos
+              </button>
+              <button
+                onClick={handleCollapseAll}
+                className="py-2 px-3 text-[10px] font-black uppercase tracking-wider bg-stone-100 hover:bg-stone-200 dark:bg-stone-850 dark:hover:bg-stone-800 text-stone-900 dark:text-stone-150 rounded-lg transition-colors cursor-pointer"
+              >
+                Colapsar todos
+              </button>
+            </div>
+          </div>
+
+          {Object.keys(groupedProperties).length === 0 ? (
             <div className="text-center py-16 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-6 text-stone-450">
-              No hay publicaciones listadas en el sistema.
+              No hay publicaciones que coincidan con la búsqueda.
             </div>
           ) : (
-            <div className="overflow-hidden rounded-xl border border-stone-200 dark:border-stone-850 bg-white dark:bg-stone-900 shadow-sm">
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse text-left text-xs">
-                  <thead className="bg-stone-50 dark:bg-stone-950 font-bold text-stone-450 uppercase tracking-widest text-[9px] border-b border-stone-200 dark:border-stone-850">
-                    <tr>
-                      <th className="px-6 py-4">Inmueble</th>
-                      <th className="px-6 py-4">Propietario / Email</th>
-                      <th className="px-6 py-4">Precio</th>
-                      <th className="px-6 py-4">Ubicación</th>
-                      <th className="px-6 py-4">Estado</th>
-                      <th className="px-6 py-4 text-right">Acción de Auditoría</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-stone-100 dark:divide-stone-850 font-medium text-stone-700 dark:text-stone-300">
-                    {properties.map((prop) => (
-                      <tr key={prop.id} className="hover:bg-stone-50/50 dark:hover:bg-stone-950/20 transition-colors">
-                        <td className="px-6 py-4">
-                          <Link href={`/propiedad/${prop.slug}`} className="hover:text-primary hover:underline line-clamp-1 font-bold text-stone-900 dark:text-stone-100">
-                            {prop.title}
-                          </Link>
-                        </td>
-                        <td className="px-6 py-4 text-[10px] font-bold font-mono text-stone-450">{prop.userEmail}</td>
-                        <td className="px-6 py-4 text-emerald-700 dark:text-emerald-450 font-extrabold">
-                          {prop.currency === 'CRC' ? '₡' : '$'}{prop.price.toLocaleString()}
-                        </td>
-                        <td className="px-6 py-4 font-semibold text-stone-500">{prop.province}</td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex rounded px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
-                            prop.status === 'active'
-                              ? 'bg-emerald-500/10 text-emerald-700'
-                              : prop.status === 'pending'
-                              ? 'bg-amber-500/10 text-amber-700'
-                              : 'bg-red-500/10 text-red-700'
-                          }`}>
-                            {prop.status === 'active' ? 'Activo' : prop.status === 'pending' ? 'Pendiente' : 'Rechazado'}
+            <div className="space-y-4">
+              {Object.entries(groupedProperties).map(([email, userProps]) => {
+                const isExpanded = !!expandedUsers[email];
+                return (
+                  <div
+                    key={email}
+                    className="overflow-hidden rounded-xl border border-stone-200 dark:border-stone-855 bg-white dark:bg-stone-900 shadow-sm"
+                  >
+                    {/* Collapsible Header */}
+                    <button
+                      onClick={() => toggleUserExpand(email)}
+                      className="w-full flex items-center justify-between p-4.5 bg-stone-50/50 hover:bg-stone-50 dark:bg-stone-950/20 dark:hover:bg-stone-950/40 text-left border-b border-stone-200 dark:border-stone-850 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-lg bg-stone-100 dark:bg-stone-850 flex items-center justify-center text-stone-600 dark:text-stone-400">
+                          <Users className="h-4.5 w-4.5" />
+                        </div>
+                        <div>
+                          <span className="font-mono text-xs font-bold text-stone-900 dark:text-stone-100">
+                            {email}
                           </span>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            {prop.status !== 'active' && (
-                              <button
-                                onClick={() => handleModerate(prop.id, 'approve')}
-                                className="p-1.5 rounded bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 hover:bg-emerald-100/60 transition-colors cursor-pointer"
-                                title="Aprobar Anuncio"
-                              >
-                                <Check className="h-4 w-4" />
-                              </button>
-                            )}
-                            {prop.status !== 'rejected' && (
-                              <button
-                                onClick={() => handleModerate(prop.id, 'reject')}
-                                className="p-1.5 rounded bg-amber-50 dark:bg-amber-950/20 text-amber-700 hover:bg-amber-100/60 transition-colors cursor-pointer"
-                                title="Rechazar Anuncio"
-                              >
-                                <X className="h-4 w-4" />
-                              </button>
-                            )}
-                            
-                            {/* Toggle featured */}
-                            <button
-                              onClick={() => handleModerate(prop.id, 'feature')}
-                              className={`p-1.5 rounded transition-colors cursor-pointer ${
-                                prop.featured
-                                  ? 'bg-amber-600 text-white shadow-sm'
-                                  : 'bg-stone-50 dark:bg-stone-800 text-stone-400 hover:text-amber-600'
-                              }`}
-                              title="Destacar Anuncio Premium"
-                            >
-                              <Award className="h-4 w-4" />
-                            </button>
+                          <span className="text-[10px] font-bold text-stone-450 dark:text-stone-550 ml-3 bg-stone-100 dark:bg-stone-850 px-2 py-0.5 rounded">
+                            {userProps.length} {userProps.length === 1 ? 'anuncio' : 'anuncios'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-stone-450 flex items-center">
+                        {isExpanded ? (
+                          <ChevronDown className="h-4.5 w-4.5" />
+                        ) : (
+                          <ChevronRight className="h-4.5 w-4.5" />
+                        )}
+                      </div>
+                    </button>
 
-                            {/* Toggle verified */}
-                            <button
-                              onClick={() => handleModerate(prop.id, 'verify')}
-                              className={`p-1.5 rounded transition-colors cursor-pointer ${
-                                prop.verified
-                                  ? 'bg-emerald-600 text-white shadow-sm'
-                                  : 'bg-stone-50 dark:bg-stone-800 text-stone-400 hover:text-emerald-600'
-                              }`}
-                              title="Verificar por OTP"
-                            >
-                              <CheckCircle2 className="h-4 w-4" />
-                            </button>
+                    {/* Table of Properties (Only if Expanded) */}
+                    {isExpanded && (
+                      <div className="overflow-x-auto animate-fadeIn">
+                        <table className="w-full border-collapse text-left text-xs">
+                          <thead className="bg-stone-50/30 dark:bg-stone-950/10 font-bold text-stone-450 uppercase tracking-widest text-[9px] border-b border-stone-200 dark:border-stone-850">
+                            <tr>
+                              <th className="px-6 py-4">Inmueble</th>
+                              <th className="px-6 py-4">Precio</th>
+                              <th className="px-6 py-4">Ubicación</th>
+                              <th className="px-6 py-4">Estado / Expiración</th>
+                              <th className="px-6 py-4 text-right">Acción de Auditoría</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-stone-100 dark:divide-stone-850 font-medium text-stone-700 dark:text-stone-300">
+                            {userProps.map((prop) => {
+                              // Expiration date calculation text
+                              let expiryText = '';
+                              if (prop.featured) {
+                                if (prop.featuredExpiresAt) {
+                                  const expDate = new Date(prop.featuredExpiresAt);
+                                  const diffDays = Math.ceil((expDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                                  expiryText = diffDays > 0 
+                                    ? `Destacado (Vence en ${diffDays}d)`
+                                    : 'Destaque expirado';
+                                } else {
+                                  expiryText = 'Destacado (Ilimitado)';
+                                }
+                              }
 
-                            {/* Delete Permanent */}
-                            <button
-                              onClick={() => handleModerate(prop.id, 'delete')}
-                              className="p-1.5 rounded bg-red-50 dark:bg-red-950/20 text-red-600 hover:bg-red-100 transition-colors cursor-pointer"
-                              title="Eliminar Anuncio Definitivamente"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                              return (
+                                <tr key={prop.id} className="hover:bg-stone-50/50 dark:hover:bg-stone-950/20 transition-colors">
+                                  <td className="px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                      {prop.imageUrl && (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img
+                                          src={prop.imageUrl}
+                                          alt={prop.title}
+                                          className="h-10 w-10 object-cover rounded-lg border border-card-border shrink-0"
+                                        />
+                                      )}
+                                      <Link href={`/propiedad/${prop.slug}`} className="hover:text-primary hover:underline line-clamp-1 font-bold text-stone-900 dark:text-stone-100">
+                                        {prop.title}
+                                      </Link>
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4 text-emerald-700 dark:text-emerald-450 font-extrabold">
+                                    {prop.currency === 'CRC' ? '₡' : '$'}{prop.price.toLocaleString()}
+                                  </td>
+                                  <td className="px-6 py-4 font-semibold text-stone-500">{prop.province}</td>
+                                  <td className="px-6 py-4">
+                                    <div className="flex flex-col gap-1.5">
+                                      <span className={`inline-flex self-start rounded px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+                                        prop.status === 'active'
+                                          ? 'bg-emerald-500/10 text-emerald-700'
+                                          : prop.status === 'pending'
+                                          ? 'bg-amber-500/10 text-amber-700'
+                                          : 'bg-red-500/10 text-red-700'
+                                      }`}>
+                                        {prop.status === 'active' ? 'Activo' : prop.status === 'pending' ? 'Pendiente' : 'Rechazado'}
+                                      </span>
+                                      {prop.featured && (
+                                        <span className="text-[8px] font-bold text-amber-600 dark:text-amber-450 uppercase tracking-wide">
+                                          ★ {expiryText}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4 text-right">
+                                    <div className="flex items-center justify-end gap-2">
+                                      {prop.status !== 'active' && (
+                                        <button
+                                          onClick={() => handleModerate(prop.id, 'approve')}
+                                          className="p-1.5 rounded bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 hover:bg-emerald-100/60 transition-colors cursor-pointer"
+                                          title="Aprobar Anuncio"
+                                        >
+                                          <Check className="h-4 w-4" />
+                                        </button>
+                                      )}
+                                      {prop.status !== 'rejected' && (
+                                        <button
+                                          onClick={() => handleModerate(prop.id, 'reject')}
+                                          className="p-1.5 rounded bg-amber-50 dark:bg-amber-950/20 text-amber-700 hover:bg-amber-100/60 transition-colors cursor-pointer"
+                                          title="Rechazar Anuncio"
+                                        >
+                                          <X className="h-4 w-4" />
+                                        </button>
+                                      )}
+                                      
+                                      {/* Toggle featured */}
+                                      <button
+                                        onClick={() => handleModerate(prop.id, 'feature')}
+                                        className={`p-1.5 rounded transition-colors cursor-pointer ${
+                                          prop.featured
+                                            ? 'bg-amber-600 text-white shadow-sm'
+                                            : 'bg-stone-50 dark:bg-stone-800 text-stone-400 hover:text-amber-600'
+                                        }`}
+                                        title="Destacar Anuncio Premium"
+                                      >
+                                        <Award className="h-4 w-4" />
+                                      </button>
+                                      
+                                      {/* Toggle verified */}
+                                      <button
+                                        onClick={() => handleModerate(prop.id, 'verify')}
+                                        className={`p-1.5 rounded transition-colors cursor-pointer ${
+                                          prop.verified
+                                            ? 'bg-emerald-600 text-white shadow-sm'
+                                            : 'bg-stone-50 dark:bg-stone-800 text-stone-400 hover:text-emerald-600'
+                                        }`}
+                                        title="Verificar por OTP"
+                                      >
+                                        <CheckCircle2 className="h-4 w-4" />
+                                      </button>
+
+                                      {/* Delete Permanent */}
+                                      <button
+                                        onClick={() => handleModerate(prop.id, 'delete')}
+                                        className="p-1.5 rounded bg-red-50 dark:bg-red-950/20 text-red-600 hover:bg-red-100 transition-colors cursor-pointer"
+                                        title="Eliminar Anuncio Definitivamente"
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
