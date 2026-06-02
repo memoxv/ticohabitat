@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { Heart, MessageSquare, BedDouble, Bath, Car, CheckCircle2, Award, Sparkles, Phone } from 'lucide-react';
 
@@ -28,6 +29,7 @@ export interface PropertyCardProps {
 }
 
 export default function PropertyCard({ property }: { property: PropertyCardProps }) {
+  const router = useRouter();
   const { toggleFavorite, isFavorite } = useApp();
   const favorited = isFavorite(property.id);
 
@@ -96,11 +98,11 @@ export default function PropertyCard({ property }: { property: PropertyCardProps
     <div className="group relative flex flex-col bg-card-bg rounded-3xl overflow-hidden hover-lift shadow-[0_12px_30px_-10px_rgba(15,22,19,0.02)] transition-all duration-350 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
       {/* Property Image Cover - uses div+onClick to avoid nested <a> from tooltip */}
       <div
-        onClick={() => window.location.href = `/propiedad/${property.slug}`}
+        onClick={() => router.push(`/propiedad/${property.slug}`)}
         className="relative aspect-[4/3] w-full overflow-hidden bg-stone-100 dark:bg-stone-850 block rounded-t-3xl cursor-pointer"
         role="link"
         tabIndex={0}
-        onKeyDown={(e) => { if (e.key === 'Enter') window.location.href = `/propiedad/${property.slug}`; }}
+        onKeyDown={(e) => { if (e.key === 'Enter') router.push(`/propiedad/${property.slug}`); }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
