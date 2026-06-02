@@ -49,9 +49,51 @@ export default async function Home() {
     };
   });
 
+  const schemaJson = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': 'https://ticohabitat.com/#website',
+        'url': 'https://ticohabitat.com',
+        'name': 'TicoHabitat',
+        'description': 'La plataforma inmobiliaria más rápida y confiable de Costa Rica. Alquiler y venta de propiedades directamente con el dueño.',
+        'potentialAction': {
+          '@type': 'SearchAction',
+          'target': {
+            '@type': 'EntryPoint',
+            'urlTemplate': 'https://ticohabitat.com/comprar?search={search_term_string}'
+          },
+          'query-input': 'required name=search_term_string'
+        },
+        'inLanguage': 'es'
+      },
+      {
+        '@type': 'Organization',
+        '@id': 'https://ticohabitat.com/#organization',
+        'name': 'TicoHabitat',
+        'url': 'https://ticohabitat.com',
+        'logo': {
+          '@type': 'ImageObject',
+          'url': 'https://ticohabitat.com/logo-vertical.png',
+          'width': '512',
+          'height': '512'
+        },
+        'description': 'Plataforma para encontrar casas, apartamentos, lotes y quintas en alquiler y venta en Costa Rica. Trato directo, verificación OTP celular y control real contra anuncios duplicados.',
+        'sameAs': [
+          'https://facebook.com/ticohabitat',
+          'https://instagram.com/ticohabitat'
+        ]
+      }
+    ]
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-stone-50/20 dark:bg-stone-950/20 transition-colors duration-150">
-      
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaJson) }}
+      />
       {/* 1. HERO SECTION - Premium, Breathable, Nature-Integrated Editorial Layout */}
       <section className="relative py-32 lg:py-44 border-b border-stone-250/30 dark:border-stone-900/80 hero-gradient">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center space-y-10">

@@ -54,8 +54,24 @@ export default async function AlquilarIndex() {
   const featuredTotal = featuredResult.totalCount;
   const provinceCounts = PROVINCES.map((prov, i) => ({ ...prov, count: countResults[i] as number }));
 
+  const schemaJson = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    'name': 'Alquiler de Propiedades en Costa Rica | TicoHabitat',
+    'description': 'Descubra casas, apartamentos, cuartos y locales en alquiler en Costa Rica. Trato directo con el propietario sin intermediarios.',
+    'url': 'https://ticohabitat.com/alquilar',
+    'about': {
+      '@type': 'Place',
+      'name': 'Costa Rica'
+    }
+  };
+
   return (
     <div className="flex-grow bg-stone-50/20 dark:bg-stone-950/20 py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaJson) }}
+      />
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         
         {/* Breadcrumb */}

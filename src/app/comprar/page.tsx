@@ -54,8 +54,24 @@ export default async function ComprarIndex() {
   const featuredTotal = featuredResult.totalCount;
   const provinceCounts = PROVINCES.map((prov, i) => ({ ...prov, count: countResults[i] as number }));
 
+  const schemaJson = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    'name': 'Propiedades en Venta en Costa Rica | TicoHabitat',
+    'description': 'Encuentre casas, apartamentos, lotes y quintas en venta en Costa Rica. Trato directo con el propietario sin intermediarios.',
+    'url': 'https://ticohabitat.com/comprar',
+    'about': {
+      '@type': 'Place',
+      'name': 'Costa Rica'
+    }
+  };
+
   return (
     <div className="flex-grow bg-stone-50/20 dark:bg-stone-950/20 py-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaJson) }}
+      />
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         
         {/* Breadcrumb */}
