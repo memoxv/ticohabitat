@@ -34,19 +34,18 @@ export interface PropertySubmitData {
 }
 
 export async function createPropertyAction(data: PropertySubmitData) {
-  const session = await getSession();
-  if (!session) {
-    return { success: false, message: 'Debe iniciar sesión para publicar una propiedad.' };
-  }
-
-  // Enforce at least 1 image on server
-  if (!data.imageUrls || data.imageUrls.length === 0) {
-    return { success: false, message: 'Debe incluir al menos 1 fotografía obligatoria para publicar la propiedad.' };
-  }
-
-  const { contactPhone } = data;
-
   try {
+    const session = await getSession();
+    if (!session) {
+      return { success: false, message: 'Debe iniciar sesión para publicar una propiedad.' };
+    }
+
+    // Enforce at least 1 image on server
+    if (!data || !data.imageUrls || data.imageUrls.length === 0) {
+      return { success: false, message: 'Debe incluir al menos 1 fotografía obligatoria para publicar la propiedad.' };
+    }
+
+    const { contactPhone } = data;
     // 0. Defensive: Ensure the session user exists in the database to prevent foreign key errors (P2003) from legacy session cookies!
     let dbUser = await db.user.findUnique({
       where: { id: session.userId },
@@ -241,22 +240,23 @@ export async function createPropertyAction(data: PropertySubmitData) {
     };
   } catch (error) {
     // Log detailed trace securely to the system database log (bitácora)
+    const currentSession = await getSession();
     await logSystemError('createPropertyAction', error, {
-      userId: session.userId,
-      title: data.title,
-      contactPhone: data.contactPhone,
+      userId: currentSession?.userId || 'unknown',
+      title: data?.title,
+      contactPhone: data?.contactPhone,
     });
     return { success: false, message: 'Ocurrió un error al crear el anuncio inmobiliario.' };
   }
 }
 
 export async function deletePropertyAction(propertyId: string) {
-  const session = await getSession();
-  if (!session) {
-    return { success: false, message: 'No autorizado' };
-  }
-
   try {
+    const session = await getSession();
+    if (!session) {
+      return { success: false, message: 'No autorizado' };
+    }
+
     const property = await db.property.findUnique({
       where: { id: propertyId },
     });
@@ -286,10 +286,10 @@ export async function deletePropertyAction(propertyId: string) {
 }
 
 export async function toggleFavoriteAction(propertyId: string) {
-  const session = await getSession();
-  if (!session) return { success: false, message: 'Debe iniciar sesión para guardar favoritos.' };
-
   try {
+    const session = await getSession();
+    if (!session) return { success: false, message: 'Debe iniciar sesión para guardar favoritos.' };
+
     const existing = await db.favorite.findUnique({
       where: {
         userId_propertyId: {
@@ -320,8 +320,8 @@ export async function toggleFavoriteAction(propertyId: string) {
 }
 
 export async function reportPropertyAction(propertyId: string, reason: string, details?: string) {
-  const session = await getSession();
   try {
+    const session = await getSession();
     await db.report.create({
       data: {
         userId: session?.userId || null,
@@ -342,12 +342,12 @@ export async function reportPropertyAction(propertyId: string, reason: string, d
 
 // Admin Operations
 export async function moderatePropertyAction(propertyId: string, action: 'approve' | 'reject' | 'delete' | 'feature' | 'verify') {
-  const session = await getSession();
-  if (!session || session.role !== 'ADMIN') {
-    return { success: false, message: 'Acceso denegado: Se requiere rol de Administrador.' };
-  }
-
   try {
+    const session = await getSession();
+    if (!session || session.role !== 'ADMIN') {
+      return { success: false, message: 'Acceso denegado: Se requiere rol de Administrador.' };
+    }
+
     if (action === 'approve') {
       await db.property.update({
         where: { id: propertyId },
@@ -400,12 +400,12 @@ export async function moderatePropertyAction(propertyId: string, action: 'approv
 }
 
 export async function getUserPropertiesCountAction() {
-  const session = await getSession();
-  if (!session) {
-    return { success: false, count: 0, role: 'USER' };
-  }
-
   try {
+    const session = await getSession();
+    if (!session) {
+      return { success: false, count: 0, role: 'USER' };
+    }
+
     let dbUser = await db.user.findUnique({
       where: { id: session.userId },
     });
@@ -436,12 +436,12 @@ export async function getUserPropertiesCountAction() {
 }
 
 export async function togglePropertyActiveStatusAction(propertyId: string, newStatus: 'active' | 'archived') {
-  const session = await getSession();
-  if (!session) {
-    return { success: false, message: 'No autorizado. Por favor inicie sesión.' };
-  }
-
   try {
+    const session = await getSession();
+    if (!session) {
+      return { success: false, message: 'No autorizado. Por favor inicie sesión.' };
+    }
+
     const property = await db.property.findUnique({
       where: { id: propertyId },
       select: { id: true, userId: true, title: true, status: true, province: true }
@@ -522,16 +522,15 @@ export async function togglePropertyActiveStatusAction(propertyId: string, newSt
 }
 
 export async function updatePropertyAction(propertyId: string, data: PropertySubmitData) {
-  const session = await getSession();
-  if (!session) {
-    return { success: false, message: 'Debe iniciar sesión para editar una propiedad.' };
-  }
-
-  if (!data.imageUrls || data.imageUrls.length === 0) {
-    return { success: false, message: 'Debe incluir al menos 1 fotografía obligatoria.' };
-  }
-
   try {
+    const session = await getSession();
+    if (!session) {
+      return { success: false, message: 'Debe iniciar sesión para editar una propiedad.' };
+    }
+
+    if (!data || !data.imageUrls || data.imageUrls.length === 0) {
+      return { success: false, message: 'Debe incluir al menos 1 fotografía obligatoria.' };
+    }
     // 1. Verify property existence and ownership
     const property = await db.property.findUnique({
       where: { id: propertyId },
@@ -613,10 +612,11 @@ export async function updatePropertyAction(propertyId: string, data: PropertySub
     return { success: true, message: '¡Tu anuncio ha sido actualizado con éxito!' };
   } catch (error) {
     // Log detailed trace securely to the system database log (bitácora)
+    const currentSession = await getSession();
     await logSystemError('updatePropertyAction', error, {
-      userId: session.userId,
+      userId: currentSession?.userId || 'unknown',
       propertyId,
-      title: data.title,
+      title: data?.title,
     });
     return { success: false, message: 'Error interno al intentar guardar los cambios.' };
   }
