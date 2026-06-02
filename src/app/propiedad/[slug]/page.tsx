@@ -174,7 +174,7 @@ export default async function PropertyDetailsPage({ params }: { params: Promise<
   };
 
   const specItems = [];
-  if (property.propertyType !== 'lot' && property.propertyType !== 'commercial') {
+  if (property.propertyType !== 'lot' && property.propertyType !== 'commercial' && property.bedrooms > 0) {
     specItems.push({
       icon: <BedDouble className="h-5.5 w-5.5" />,
       value: property.bedrooms,
@@ -182,16 +182,20 @@ export default async function PropertyDetailsPage({ params }: { params: Promise<
     });
   }
   if (property.propertyType !== 'lot') {
-    specItems.push({
-      icon: <Bath className="h-5.5 w-5.5" />,
-      value: property.bathrooms,
-      label: property.bathrooms === 1 ? 'Baño' : 'Baños'
-    });
-    specItems.push({
-      icon: <Car className="h-5.5 w-5.5" />,
-      value: property.parkingSpaces,
-      label: property.parkingSpaces === 1 ? 'Parqueo' : 'Parqueos'
-    });
+    if (property.bathrooms > 0) {
+      specItems.push({
+        icon: <Bath className="h-5.5 w-5.5" />,
+        value: property.bathrooms,
+        label: property.bathrooms === 1 ? 'Baño' : 'Baños'
+      });
+    }
+    if (property.parkingSpaces > 0) {
+      specItems.push({
+        icon: <Car className="h-5.5 w-5.5" />,
+        value: property.parkingSpaces,
+        label: property.parkingSpaces === 1 ? 'Parqueo' : 'Parqueos'
+      });
+    }
   }
   specItems.push({
     icon: <Maximize className="h-5.5 w-5.5" />,

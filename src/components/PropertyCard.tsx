@@ -46,12 +46,16 @@ export default function PropertyCard({ property }: { property: PropertyCardProps
   }[property.propertyType] || 'Propiedad';
 
   const specsArray = [];
-  if (property.propertyType !== 'lot' && property.propertyType !== 'commercial') {
+  if (property.propertyType !== 'lot' && property.propertyType !== 'commercial' && property.bedrooms > 0) {
     specsArray.push(`${property.bedrooms} ${property.bedrooms === 1 ? 'hab' : 'habs'}`);
   }
   if (property.propertyType !== 'lot') {
-    specsArray.push(`${property.bathrooms} ${property.bathrooms === 1 ? 'baño' : 'baños'}`);
-    specsArray.push(`${property.parkingSpaces} ${property.parkingSpaces === 1 ? 'parq' : 'parqs'}`);
+    if (property.bathrooms > 0) {
+      specsArray.push(`${property.bathrooms} ${property.bathrooms === 1 ? 'baño' : 'baños'}`);
+    }
+    if (property.parkingSpaces > 0) {
+      specsArray.push(`${property.parkingSpaces} ${property.parkingSpaces === 1 ? 'parq' : 'parqs'}`);
+    }
   }
   const specsText = specsArray.join(' · ');
 
