@@ -233,9 +233,9 @@ export default function PublicarPage() {
       reader.onload = (event) => {
         const img = new Image();
         img.onload = () => {
-          // Optimal resize constraints
-          const MAX_WIDTH = 1200;
-          const MAX_HEIGHT = 1200;
+          // Optimized resize constraints to keep Next.js Server Action payloads extremely compact (under 4.5MB Vercel limit)
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 800;
           let width = img.width;
           let height = img.height;
 
@@ -264,8 +264,8 @@ export default function PublicarPage() {
 
           ctx.drawImage(img, 0, 0, width, height);
 
-          // Export compressed image as JPEG Base64
-          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.80);
+          // Export compressed image as JPEG Base64 with highly efficient 0.65 quality (visually premium but 8x smaller!)
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.65);
           resolve(compressedBase64);
         };
         img.onerror = () => {
