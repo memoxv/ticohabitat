@@ -411,7 +411,7 @@ export default function DestacarClient({
 
                   <div className="flex justify-between text-xs items-center">
                     <span className="text-stone-450 dark:text-stone-500 font-bold uppercase text-[10px]">A Nombre De</span>
-                    <span className="font-bold text-stone-700 dark:text-stone-300">TicoHabitat</span>
+                    <span className="font-bold text-stone-700 dark:text-stone-300">Cristian Vindas</span>
                   </div>
                 </div>
               </div>
