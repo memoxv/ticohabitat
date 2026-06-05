@@ -15,9 +15,12 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   icons: {
-    icon: '/logo-icon.png',
-    shortcut: '/logo-icon.png',
-    apple: '/logo-icon.png',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/logo-icon-192.png', sizes: '192x192', type: 'image/png' }
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/logo-icon-192.png',
   },
   openGraph: {
     title: 'TicoHabitat | Bienes Raíces en Costa Rica',
