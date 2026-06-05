@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ToastContainer from '@/components/ToastContainer';
 import SearchAssistantBubble from '@/components/SearchAssistantBubble';
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata: Metadata = {
   title: 'TicoHabitat | Propiedades en Costa Rica (Alquiler y Venta)',
@@ -52,6 +53,7 @@ export default function RootLayout({
           <Footer />
           <ToastContainer />
           <SearchAssistantBubble />
+          <Analytics />
         </AppProvider>
 
         {/* PWA Service Worker Registration */}
