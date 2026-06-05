@@ -36,18 +36,47 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     };
   }
 
+  // Traducción y enriquecimiento de palabras clave de tipo y transacción
+  const typeMap: Record<string, string> = {
+    house: 'Casa',
+    apartment: 'Apartamento',
+    lot: 'Lote o Terreno',
+    commercial: 'Local Comercial',
+    office: 'Oficina',
+    industrial: 'Bodega Industrial',
+    other: 'Propiedad',
+  };
+
+  const actionText = property.type === 'buy' ? 'Venta' : 'Alquiler';
+  const propertyTypeName = typeMap[property.propertyType] || 'Propiedad';
+  
+  // Ubicación estructurada
+  const locationText = property.canton 
+    ? `${property.canton}, ${property.province}` 
+    : property.province;
+
+  // Título súper optimizado para SEO
+  const seoTitle = `${propertyTypeName} en ${actionText} en ${locationText} | ${property.title} | TicoHabitat`;
+  
+  // Limpiar y optimizar la descripción para Google (máx 155 caracteres)
+  const cleanDescription = property.description
+    .replace(/[\r\n\s]+/g, ' ')
+    .substring(0, 155)
+    .trim();
+  const seoDescription = `${propertyTypeName} en ${actionText} en ${locationText}. ${cleanDescription}...`;
+
   const imageUrl = property.images?.[0]?.url || 'https://ticohabitat.com/default-brand-cover.jpg';
   const url = `https://ticohabitat.com/propiedad/${resolvedParams.slug}`;
 
   return {
-    title: `${property.title} | TicoHabitat`,
-    description: property.description.substring(0, 155) + '...',
+    title: seoTitle,
+    description: seoDescription,
     alternates: {
       canonical: `/propiedad/${resolvedParams.slug}`,
     },
     openGraph: {
-      title: `${property.title} | TicoHabitat`,
-      description: property.description.substring(0, 155) + '...',
+      title: seoTitle,
+      description: seoDescription,
       url,
       siteName: 'TicoHabitat',
       locale: 'es_CR',
@@ -57,14 +86,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
           url: imageUrl,
           width: 1200,
           height: 630,
-          alt: property.title,
-        }
-      ]
+          alt: seoTitle,
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${property.title} | TicoHabitat`,
-      description: property.description.substring(0, 155) + '...',
+      title: seoTitle,
+      description: seoDescription,
       images: [imageUrl],
     }
   };
