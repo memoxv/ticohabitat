@@ -451,5 +451,19 @@ export function parseNaturalLanguageQuery(query: string): ParsedFilters {
     }
   }
 
+  // Smart transaction type inference based on propertyType and price limits
+  if (!filters.type) {
+    if (filters.propertyType === 'lot' || filters.propertyType === 'quinta') {
+      filters.type = 'buy';
+    } else if (parsedPrice !== null) {
+      // If the price is very high, it is highly likely to be a purchase (buy) rather than a monthly rent
+      if (filters.currency === 'USD' && parsedPrice > 15000) {
+        filters.type = 'buy';
+      } else if (filters.currency === 'CRC' && parsedPrice > 7500000) { // > 7.5 million colones
+        filters.type = 'buy';
+      }
+    }
+  }
+
   return filters;
 }

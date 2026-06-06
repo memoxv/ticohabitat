@@ -222,7 +222,37 @@ export default function SearchAssistantBubble() {
   const getCatalogLink = () => {
     if (!activeFilters) return '/alquilar';
     
-    const typePath = activeFilters.type === 'buy' ? 'comprar' : 'alquilar';
+    // Determine the type: check filter first
+    let type = activeFilters.type;
+    
+    // If filter type is not explicitly set (e.g. "lote en Cartago"), infer it from the properties shown in the assistant's response
+    if (!type) {
+      // Find the last assistant message with properties or fallbackProperties
+      const lastAssistantMessage = [...messages]
+        .reverse()
+        .find(m => m.sender === 'assistant' && ((m.properties && m.properties.length > 0) || (m.fallbackProperties && m.fallbackProperties.length > 0)));
+      
+      const props = lastAssistantMessage?.properties || lastAssistantMessage?.fallbackProperties || [];
+      if (props.length > 0) {
+        // Count buy vs rent in the properties
+        const buyCount = props.filter((p: any) => p.type === 'buy').length;
+        const rentCount = props.filter((p: any) => p.type === 'rent').length;
+        if (buyCount > rentCount) {
+          type = 'buy';
+        } else if (rentCount > buyCount) {
+          type = 'rent';
+        }
+      }
+    }
+    
+    // Further fallback based on property type (lots are typically for sale)
+    if (!type) {
+      if (activeFilters.propertyType === 'lot' || activeFilters.propertyType === 'quinta') {
+        type = 'buy';
+      }
+    }
+    
+    const typePath = type === 'buy' ? 'comprar' : 'alquilar';
     
     // Smart province slug: if not explicitly selected, try to extract from matched properties or default to 'san-jose'
     let provinceSlug = '';
