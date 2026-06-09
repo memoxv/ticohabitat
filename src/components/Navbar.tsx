@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useTransition } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
@@ -18,16 +18,15 @@ import {
 export default function Navbar() {
   const { language, setLanguage, user, logout, favorites } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [isChangingLanguage, setIsChangingLanguage] = useState(false);
   const router = useRouter();
   const t = getTranslations(language);
 
   const handleLanguageToggle = () => {
     const nextLang = language === 'es' ? 'en' : 'es';
+    setIsChangingLanguage(true);
     setLanguage(nextLang);
-    startTransition(() => {
-      router.refresh();
-    });
+    window.location.reload();
   };
 
   return (
@@ -92,11 +91,11 @@ export default function Navbar() {
             {/* Language Switcher */}
             <button
               onClick={handleLanguageToggle}
-              disabled={isPending}
+              disabled={isChangingLanguage}
               className="flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-stone-500 dark:text-stone-450 hover:text-stone-900 dark:hover:text-white bg-stone-100/50 dark:bg-stone-850/20 hover:bg-stone-100 dark:hover:bg-stone-850/50 px-2.5 py-1.5 rounded-lg border border-stone-200/40 dark:border-stone-800/40 transition-all cursor-pointer shadow-sm ml-1 disabled:opacity-60 disabled:cursor-not-allowed"
               title={language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
             >
-              {isPending ? (
+              {isChangingLanguage ? (
                 <span className="flex items-center gap-1.5 px-0.5">
                   <span className="h-2.5 w-2.5 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
                   <span className="text-[10px] text-stone-400 font-bold">{language === 'es' ? 'EN' : 'ES'}</span>
@@ -160,11 +159,11 @@ export default function Navbar() {
             {/* Mobile Language Switcher (Quick Toggle Icon) */}
             <button
               onClick={handleLanguageToggle}
-              disabled={isPending}
+              disabled={isChangingLanguage}
               className="text-[10px] font-black bg-stone-100/60 dark:bg-stone-850/40 border border-stone-200/40 dark:border-stone-800/40 px-2.5 py-1 rounded disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-1"
               title={language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
             >
-              {isPending ? (
+              {isChangingLanguage ? (
                 <span className="h-2 w-2 border border-primary border-t-transparent rounded-full animate-spin"></span>
               ) : null}
               <span>{language.toUpperCase()}</span>
