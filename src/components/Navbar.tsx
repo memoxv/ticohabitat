@@ -31,9 +31,10 @@ export default function Navbar() {
   };
 
   return (
-    <nav className={`sticky top-4 z-50 mx-auto max-w-5xl w-[92%] bg-card-bg/85 backdrop-blur-md border border-card-border/40 shadow-[0_8px_30px_rgba(0,0,0,0.02)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.15)] transition-[background-color,border-color,shadow] duration-350 px-6 py-0.5 ${
-      mobileMenuOpen ? 'rounded-[2rem]' : 'rounded-full'
-    }`}>
+    <>
+      <nav className={`sticky top-4 z-50 mx-auto max-w-5xl w-[92%] bg-card-bg/85 backdrop-blur-md border border-card-border/40 shadow-[0_8px_30px_rgba(0,0,0,0.02)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.15)] transition-[background-color,border-color,shadow] duration-350 px-6 py-0.5 ${
+        mobileMenuOpen ? 'rounded-[2rem]' : 'rounded-full'
+      }`}>
       <div className="w-full">
         <div className="flex h-14 items-center justify-between">
           {/* Logo */}
@@ -292,6 +293,7 @@ export default function Navbar() {
           </div>
         </div>
       )}
-    </nav>
+      </nav>
+    </>
   );
 }
