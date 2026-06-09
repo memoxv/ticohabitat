@@ -24,11 +24,17 @@ export default function Navbar() {
   const t = getTranslations(language);
 
   const handleLanguageToggle = () => {
+    if (isPendingLanguage) return;
+    
     const nextLang = language === 'es' ? 'en' : 'es';
     setIsPendingLanguage(true);
-    setLanguage(nextLang);
-    // Force a complete browser refresh to clear Next.js route caches and update all sections at once
-    window.location.reload();
+    
+    // Delay the state switch and browser reload by 1 second
+    // to show the loading screen and completely block button spamming
+    setTimeout(() => {
+      setLanguage(nextLang);
+      window.location.reload();
+    }, 1000);
   };
 
   return (
