@@ -94,21 +94,12 @@ export default function Navbar() {
             <button
               onClick={handleLanguageToggle}
               disabled={isPending}
-              className="flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-stone-500 dark:text-stone-450 hover:text-stone-900 dark:hover:text-white bg-stone-100/50 dark:bg-stone-850/20 hover:bg-stone-100 dark:hover:bg-stone-850/50 px-2.5 py-1.5 rounded-lg border border-stone-200/40 dark:border-stone-800/40 transition-all cursor-pointer shadow-sm ml-1 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-stone-500 dark:text-stone-450 hover:text-stone-900 dark:hover:text-white bg-stone-100/50 dark:bg-stone-850/20 hover:bg-stone-100 dark:hover:bg-stone-850/50 px-2.5 py-1.5 rounded-lg border border-stone-200/40 dark:border-stone-800/40 transition-all cursor-pointer shadow-sm ml-1 disabled:opacity-80 disabled:cursor-not-allowed"
               title={language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
             >
-              {isPending ? (
-                <span className="flex items-center gap-1.5 px-0.5">
-                  <span className="h-2.5 w-2.5 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
-                  <span className="text-[10px] text-stone-400 font-bold">{language === 'es' ? 'EN' : 'ES'}</span>
-                </span>
-              ) : (
-                <>
-                  <span className={language === 'es' ? 'text-primary font-extrabold' : 'opacity-60'}>ES</span>
-                  <span className="text-stone-300 dark:text-stone-700">|</span>
-                  <span className={language === 'en' ? 'text-primary font-extrabold' : 'opacity-60'}>EN</span>
-                </>
-              )}
+              <span className={language === 'es' ? 'text-primary font-extrabold' : 'opacity-60'}>ES</span>
+              <span className="text-stone-300 dark:text-stone-700">|</span>
+              <span className={language === 'en' ? 'text-primary font-extrabold' : 'opacity-60'}>EN</span>
             </button>
 
             {/* Auth / Admin buttons */}
@@ -162,12 +153,9 @@ export default function Navbar() {
             <button
               onClick={handleLanguageToggle}
               disabled={isPending}
-              className="text-[10px] font-black bg-stone-100/60 dark:bg-stone-850/40 border border-stone-200/40 dark:border-stone-800/40 px-2.5 py-1 rounded disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-1"
+              className="text-[10px] font-black bg-stone-100/60 dark:bg-stone-850/40 border border-stone-200/40 dark:border-stone-800/40 px-2.5 py-1 rounded disabled:opacity-80 disabled:cursor-not-allowed flex items-center gap-1"
               title={language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
             >
-              {isPending ? (
-                <span className="h-2.5 w-2.5 border border-primary border-t-transparent rounded-full animate-spin"></span>
-              ) : null}
               <span>{language.toUpperCase()}</span>
             </button>
             <button
@@ -268,7 +256,8 @@ export default function Navbar() {
           </div>
         </div>
       )}
-      
+      </nav>
+
       {/* Premium Full-Screen Loading Overlay to block interaction & show loader */}
       {isPending && (
         <div className="fixed inset-0 w-screen h-screen z-[9999] flex flex-col items-center justify-center bg-stone-900/60 dark:bg-stone-950/75 backdrop-blur-[3px] pointer-events-auto select-none transition-all duration-300">
@@ -293,7 +282,6 @@ export default function Navbar() {
           </div>
         </div>
       )}
-      </nav>
     </>
   );
 }
