@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
@@ -18,15 +18,16 @@ import {
 export default function Navbar() {
   const { language, setLanguage, user, logout, favorites } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isChangingLanguage, setIsChangingLanguage] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const t = getTranslations(language);
 
   const handleLanguageToggle = () => {
     const nextLang = language === 'es' ? 'en' : 'es';
-    setIsChangingLanguage(true);
     setLanguage(nextLang);
-    window.location.reload();
+    startTransition(() => {
+      router.refresh();
+    });
   };
 
   return (
@@ -91,11 +92,11 @@ export default function Navbar() {
             {/* Language Switcher */}
             <button
               onClick={handleLanguageToggle}
-              disabled={isChangingLanguage}
+              disabled={isPending}
               className="flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-stone-500 dark:text-stone-450 hover:text-stone-900 dark:hover:text-white bg-stone-100/50 dark:bg-stone-850/20 hover:bg-stone-100 dark:hover:bg-stone-850/50 px-2.5 py-1.5 rounded-lg border border-stone-200/40 dark:border-stone-800/40 transition-all cursor-pointer shadow-sm ml-1 disabled:opacity-60 disabled:cursor-not-allowed"
               title={language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
             >
-              {isChangingLanguage ? (
+              {isPending ? (
                 <span className="flex items-center gap-1.5 px-0.5">
                   <span className="h-2.5 w-2.5 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
                   <span className="text-[10px] text-stone-400 font-bold">{language === 'es' ? 'EN' : 'ES'}</span>
@@ -159,12 +160,12 @@ export default function Navbar() {
             {/* Mobile Language Switcher (Quick Toggle Icon) */}
             <button
               onClick={handleLanguageToggle}
-              disabled={isChangingLanguage}
+              disabled={isPending}
               className="text-[10px] font-black bg-stone-100/60 dark:bg-stone-850/40 border border-stone-200/40 dark:border-stone-800/40 px-2.5 py-1 rounded disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-1"
               title={language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
             >
-              {isChangingLanguage ? (
-                <span className="h-2 w-2 border border-primary border-t-transparent rounded-full animate-spin"></span>
+              {isPending ? (
+                <span className="h-2.5 w-2.5 border border-primary border-t-transparent rounded-full animate-spin"></span>
               ) : null}
               <span>{language.toUpperCase()}</span>
             </button>
@@ -263,6 +264,31 @@ export default function Navbar() {
                 </Link>
               </div>
             )}
+          </div>
+        </div>
+      )}
+      
+      {/* Premium Full-Screen Loading Overlay to block interaction & show loader */}
+      {isPending && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-stone-900/60 dark:bg-stone-950/70 backdrop-blur-[3px] animate-fadeIn transition-all duration-300">
+          <div className="flex flex-col items-center gap-4.5 p-7 rounded-2xl bg-white dark:bg-stone-900 border border-stone-250/20 dark:border-stone-800/60 shadow-xl max-w-xs w-[85%] text-center animate-scaleIn">
+            <div className="relative flex items-center justify-center">
+              {/* Spinner animation */}
+              <div className="h-10 w-10 border-3 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+              <img
+                src="/logo-icon.png"
+                alt="Logo"
+                className="absolute h-4.5 w-4.5 object-contain"
+              />
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs font-black uppercase tracking-widest text-stone-850 dark:text-stone-100">
+                {language === 'es' ? 'Cargando traducción' : 'Loading translation'}
+              </p>
+              <p className="text-[10px] font-bold text-stone-450 dark:text-stone-550">
+                {language === 'es' ? 'Por favor espere un momento...' : 'Please wait a moment...'}
+              </p>
+            </div>
           </div>
         </div>
       )}
