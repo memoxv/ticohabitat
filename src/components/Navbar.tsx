@@ -2,14 +2,13 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
+import { getTranslations } from '@/lib/translations';
 import {
-  Home,
   PlusCircle,
   User,
   LogOut,
-  Sun,
-  Moon,
   Menu,
   X,
   Heart,
@@ -17,8 +16,16 @@ import {
 } from 'lucide-react';
 
 export default function Navbar() {
-  const { theme, toggleTheme, user, logout, favorites } = useApp();
+  const { language, setLanguage, user, logout, favorites } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const router = useRouter();
+  const t = getTranslations(language);
+
+  const handleLanguageToggle = () => {
+    const nextLang = language === 'es' ? 'en' : 'es';
+    setLanguage(nextLang);
+    router.refresh();
+  };
 
   return (
     <nav className={`sticky top-4 z-50 mx-auto max-w-5xl w-[92%] bg-card-bg/85 backdrop-blur-md border border-card-border/40 shadow-[0_8px_30px_rgba(0,0,0,0.02)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.15)] transition-[background-color,border-color,shadow] duration-350 px-6 py-0.5 ${
@@ -46,20 +53,20 @@ export default function Navbar() {
               href="/comprar"
               className="text-sm font-bold text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white transition-colors"
             >
-              Comprar
+              {t.common.buy}
             </Link>
             <Link
               href="/alquilar"
               className="text-sm font-bold text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white transition-colors"
             >
-              Alquilar
+              {t.common.rent}
             </Link>
             
             {/* Favorites Icon with Badge */}
             <Link 
               href="/dashboard"
               className="relative p-2 rounded-lg text-stone-500 dark:text-stone-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-stone-50 dark:hover:bg-stone-850/50 transition-colors"
-              title="Mis Favoritos"
+              title={t.navbar.favorites}
             >
               <Heart className={`h-4.5 w-4.5 ${favorites.length > 0 ? 'fill-red-500 text-red-500' : ''}`} />
               {favorites.length > 0 && (
@@ -76,8 +83,19 @@ export default function Navbar() {
               className="btn-primary py-2 px-4.5 text-xs inline-flex items-center gap-1.5 transition-all shadow-sm"
             >
               <PlusCircle className="h-3.5 w-3.5" />
-              <span>Publicar Anuncio</span>
+              <span>{t.common.publish}</span>
             </Link>
+
+            {/* Language Switcher */}
+            <button
+              onClick={handleLanguageToggle}
+              className="flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-stone-500 dark:text-stone-450 hover:text-stone-900 dark:hover:text-white bg-stone-100/50 dark:bg-stone-850/20 hover:bg-stone-100 dark:hover:bg-stone-850/50 px-2.5 py-1.5 rounded-lg border border-stone-200/40 dark:border-stone-800/40 transition-all cursor-pointer shadow-sm ml-1"
+              title={language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
+            >
+              <span className={language === 'es' ? 'text-primary font-extrabold' : 'opacity-60'}>ES</span>
+              <span className="text-stone-300 dark:text-stone-700">|</span>
+              <span className={language === 'en' ? 'text-primary font-extrabold' : 'opacity-60'}>EN</span>
+            </button>
 
             {/* Auth / Admin buttons */}
             {user ? (
@@ -87,7 +105,7 @@ export default function Navbar() {
                   className="flex items-center gap-1.5 text-sm font-bold text-stone-700 dark:text-stone-200 hover:text-primary transition-colors"
                 >
                   <User className="h-4 w-4 text-stone-450" />
-                  <span>Mi Panel</span>
+                  <span>{t.common.dashboard}</span>
                 </Link>
                 {user.role === 'ADMIN' && (
                   <Link
@@ -95,13 +113,13 @@ export default function Navbar() {
                     className="flex items-center gap-1 text-xs font-black text-accent hover:underline pl-1"
                   >
                     <ShieldCheck className="h-3.5 w-3.5" />
-                    <span>Admin</span>
+                    <span>{t.common.admin}</span>
                   </Link>
                 )}
                 <button
                   onClick={logout}
                   className="p-2 text-stone-400 hover:text-red-500 hover:bg-stone-50 dark:hover:bg-stone-800/40 rounded-lg transition-colors cursor-pointer ml-1"
-                  title="Cerrar Sesión"
+                  title={t.common.logout}
                 >
                   <LogOut className="h-4 w-4" />
                 </button>
@@ -112,20 +130,28 @@ export default function Navbar() {
                   href="/login"
                   className="text-sm font-bold text-stone-600 dark:text-stone-300 hover:text-stone-950 dark:hover:text-white transition-colors"
                 >
-                  Ingresar
+                  {t.common.login}
                 </Link>
                 <Link
                   href="/registro"
                   className="btn-secondary py-1.5 px-3.5 text-xs transition-colors"
                 >
-                  Registrarse
+                  {t.common.register}
                 </Link>
               </div>
             )}
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="flex md:hidden items-center">
+          <div className="flex md:hidden items-center gap-3">
+            {/* Mobile Language Switcher (Quick Toggle Icon) */}
+            <button
+              onClick={handleLanguageToggle}
+              className="text-[10px] font-black bg-stone-100/60 dark:bg-stone-850/40 border border-stone-200/40 dark:border-stone-800/40 px-2 py-1 rounded"
+              title={language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
+            >
+              {language.toUpperCase()}
+            </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="rounded-lg p-2 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-850 cursor-pointer"
@@ -145,14 +171,14 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
               className="text-sm font-bold text-stone-700 dark:text-stone-200 hover:text-stone-950"
             >
-              Comprar Propiedades
+              {t.common.buy}
             </Link>
             <Link
               href="/alquilar"
               onClick={() => setMobileMenuOpen(false)}
               className="text-sm font-bold text-stone-700 dark:text-stone-200 hover:text-stone-950"
             >
-              Alquilar Propiedades
+              {t.common.rent}
             </Link>
             <Link
               href="/dashboard"
@@ -160,7 +186,7 @@ export default function Navbar() {
               className="flex items-center gap-2 text-sm font-bold text-stone-700 dark:text-stone-200 hover:text-stone-950"
             >
               <Heart className="h-4 w-4 text-red-500 fill-current" />
-              <span>Mis Favoritos ({favorites.length})</span>
+              <span>{t.navbar.favorites} ({favorites.length})</span>
             </Link>
             <Link
               href="/publicar"
@@ -168,7 +194,7 @@ export default function Navbar() {
               className="btn-primary py-2.5 w-full flex items-center justify-center gap-2 shadow-sm"
             >
               <PlusCircle className="h-4 w-4" />
-              <span>Publicar propiedad</span>
+              <span>{t.common.publish}</span>
             </Link>
             <hr className="border-card-border/50 my-1" />
             
@@ -179,8 +205,8 @@ export default function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center gap-2 text-sm font-bold text-stone-700 dark:text-stone-200"
                 >
-                  <User className="h-4 w-4 text-stone-400" />
-                  <span>Mi Panel ({user.name})</span>
+                  <User className="h-4 w-4 text-stone-450" />
+                  <span>{t.common.dashboard} ({user.name})</span>
                 </Link>
                 {user.role === 'ADMIN' && (
                   <Link
@@ -189,7 +215,7 @@ export default function Navbar() {
                     className="flex items-center gap-2 text-sm font-bold text-accent"
                   >
                     <ShieldCheck className="h-4 w-4" />
-                    <span>Administración</span>
+                    <span>{t.navbar.adminPanel}</span>
                   </Link>
                 )}
                 <button
@@ -200,7 +226,7 @@ export default function Navbar() {
                   className="flex items-center gap-2 text-sm font-bold text-red-500 text-left cursor-pointer"
                 >
                   <LogOut className="h-4 w-4" />
-                  <span>Cerrar Sesión</span>
+                  <span>{t.common.logout}</span>
                 </button>
               </div>
             ) : (
@@ -210,14 +236,14 @@ export default function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                   className="btn-secondary py-2.5 text-center flex items-center justify-center"
                 >
-                  Ingresar
+                  {t.common.login}
                 </Link>
                 <Link
                   href="/registro"
                   onClick={() => setMobileMenuOpen(false)}
                   className="btn-primary py-2.5 text-center flex items-center justify-center"
                 >
-                  Registrarse
+                  {t.common.register}
                 </Link>
               </div>
             )}

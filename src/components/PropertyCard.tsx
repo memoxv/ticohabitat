@@ -4,7 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
-import { Heart, MessageSquare, BedDouble, Bath, Car, CheckCircle2, Award, Sparkles, Phone } from 'lucide-react';
+import { getTranslations } from '@/lib/translations';
+import { Heart, MessageSquare, CheckCircle2, Sparkles, Phone } from 'lucide-react';
 
 
 export interface PropertyCardProps {
@@ -30,33 +31,37 @@ export interface PropertyCardProps {
 
 export default function PropertyCard({ property }: { property: PropertyCardProps }) {
   const router = useRouter();
-  const { toggleFavorite, isFavorite } = useApp();
+  const { toggleFavorite, isFavorite, language } = useApp();
+  const t = getTranslations(language);
   const favorited = isFavorite(property.id);
 
-  const formattedPrice = property.currency === 'CRC'
+  const formattedPrice = property.currency === 'CRC' || property.currency === 'CRC'
     ? `₡${property.price.toLocaleString('es-CR')}`
     : `$${property.price.toLocaleString('en-US')}`;
 
-  const typeLabel = property.type === 'buy' ? 'Venta' : 'Alquiler';
+  const typeLabel = property.type === 'buy' ? t.common.buy : t.common.rent;
   
-  const propertyTypeLabel = {
-    house: 'Casa',
-    apartment: 'Apartamento',
-    lot: 'Lote / Terreno',
-    commercial: 'Local Comercial',
-    other: 'Propiedad',
-  }[property.propertyType] || 'Propiedad';
+  const propertyTypeLabel = t.card.propertyTypes[property.propertyType as keyof typeof t.card.propertyTypes] || t.card.propertyTypes.other;
 
   const specsArray = [];
   if (property.propertyType !== 'lot' && property.propertyType !== 'commercial' && property.bedrooms > 0) {
-    specsArray.push(`${property.bedrooms} ${property.bedrooms === 1 ? 'hab' : 'habs'}`);
+    const bedsText = property.bedrooms === 1 
+      ? t.card.specs.bedrooms.replace('{count}', '1')
+      : t.card.specs.bedroomsPlural.replace('{count}', String(property.bedrooms));
+    specsArray.push(bedsText);
   }
   if (property.propertyType !== 'lot') {
     if (property.bathrooms > 0) {
-      specsArray.push(`${property.bathrooms} ${property.bathrooms === 1 ? 'baño' : 'baños'}`);
+      const bathsText = property.bathrooms === 1
+        ? t.card.specs.bathrooms.replace('{count}', '1')
+        : t.card.specs.bathroomsPlural.replace('{count}', String(property.bathrooms));
+      specsArray.push(bathsText);
     }
     if (property.parkingSpaces > 0) {
-      specsArray.push(`${property.parkingSpaces} ${property.parkingSpaces === 1 ? 'parq' : 'parqs'}`);
+      const parkText = property.parkingSpaces === 1
+        ? t.card.specs.parking.replace('{count}', '1')
+        : t.card.specs.parkingPlural.replace('{count}', String(property.parkingSpaces));
+      specsArray.push(parkText);
     }
   }
   const specsText = specsArray.join(' · ');
@@ -84,7 +89,15 @@ export default function PropertyCard({ property }: { property: PropertyCardProps
     const locationText = property.canton
       ? `${property.province}, ${property.canton}`
       : property.province;
-    const text = `👋 *¡Hola!*\n\nVi tu anuncio en *TicoHabitat* 🏡\n👉 *${propertyTypeLabel}:* ${property.title}\n💰 *Precio:* ${priceText}\n📍 *Ubicación:* ${locationText}\n\n¿Sigue disponible para coordinar una visita?\n\n🔗 *Enlace:* https://ticohabitat.com/propiedad/${property.slug}`;
+    
+    const whatsappTemplate = t.card.whatsappMessageTemplate;
+    const text = whatsappTemplate
+      .replace('{propertyType}', propertyTypeLabel)
+      .replace('{title}', property.title)
+      .replace('{price}', priceText)
+      .replace('{location}', locationText)
+      .replace('{slug}', property.slug);
+
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const waUrl = isMobile 
       ? `whatsapp://send?phone=506${cleanPhone}&text=${encodeURIComponent(text)}`
@@ -102,6 +115,9 @@ export default function PropertyCard({ property }: { property: PropertyCardProps
       body: JSON.stringify({ event: 'phone_click', propertyId: property.id }),
     }).catch(console.error);
   };
+
+  const reportText = t.card.reportWhatsappMsg.replace('{phone}', property.contactPhone);
+  const reportUrl = `https://wa.me/50660677055?text=${encodeURIComponent(reportText)}`;
 
   return (
     <div className="group relative flex flex-col bg-card-bg rounded-3xl overflow-hidden hover-lift shadow-[0_12px_30px_-10px_rgba(15,22,19,0.02)] transition-all duration-350 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
@@ -133,7 +149,7 @@ export default function PropertyCard({ property }: { property: PropertyCardProps
           {property.featured && (
             <span className="badge-premium bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 text-stone-950 font-black border border-amber-300 shadow-md flex items-center gap-1">
               <Sparkles className="h-3 w-3 fill-stone-950 text-stone-950 shrink-0" />
-              <span>Destacado</span>
+              <span>{t.card.featuredBadge}</span>
             </span>
           )}
           {property.verified && (
@@ -146,24 +162,24 @@ export default function PropertyCard({ property }: { property: PropertyCardProps
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
                 </span>
                 <CheckCircle2 className="h-3 w-3 shrink-0 mr-0.5" />
-                <span>Verificado</span>
+                <span>{t.card.verifiedBadge}</span>
               </span>
               
               {/* Trust Tooltip content */}
               <div className="absolute bottom-full left-0 mb-2 w-64 p-3 bg-stone-950 text-white rounded-xl border border-stone-800 shadow-2xl opacity-0 translate-y-1 pointer-events-none group-hover/tooltip:opacity-100 group-hover/tooltip:translate-y-0 transition-all duration-200 z-50 text-[10px] leading-relaxed">
                 <div className="font-bold text-emerald-400 flex items-center gap-1 mb-1">
                   <CheckCircle2 className="h-3 w-3 text-emerald-400 shrink-0" />
-                  <span>Anunciante Verificado por Correo</span>
+                  <span>{t.card.verifiedTooltipTitle}</span>
                 </div>
                 <p className="text-stone-300">
-                  El anunciante ha validado su identidad y correo electrónico de forma segura en TicoHabitat. Contacto directo y confiable.
+                  {t.card.verifiedTooltipDesc}
                 </p>
                 <div className="mt-2 pt-2 border-t border-white/5 text-[9px] text-stone-400 font-mono flex items-center justify-between">
-                  <span>SEGURIDAD CORREO</span>
-                  <span className="text-emerald-450 font-black">100% CONFIABLE</span>
+                  <span>{language === 'en' ? 'EMAIL SECURITY' : 'SEGURIDAD CORREO'}</span>
+                  <span className="text-emerald-450 font-black">{t.card.verifiedTooltipStatus}</span>
                 </div>
                 <div className="mt-2.5 pt-2 border-t border-white/5 text-[8.5px] text-stone-400 leading-relaxed font-sans">
-                  ¿Este número de teléfono le pertenece pero está siendo utilizado por alguien más? <a href={`https://wa.me/50660677055?text=Mi%20n%C3%BAmero%20${encodeURIComponent(property.contactPhone)}%20est%C3%A1%20registrado%20en%20TicoHabitat%20por%20alguien%20que%20no%20es%20el%20due%C3%B1o`} target="_blank" rel="noopener noreferrer" className="text-emerald-450 font-bold hover:underline">Reportarlo aquí por WhatsApp ➔</a>
+                  {t.card.reportWarning} <a href={reportUrl} target="_blank" rel="noopener noreferrer" className="text-emerald-450 font-bold hover:underline">{t.card.reportLinkText}</a>
                 </div>
               </div>
             </div>
@@ -180,7 +196,7 @@ export default function PropertyCard({ property }: { property: PropertyCardProps
             toggleFavorite(property.id);
           }}
           className={`flex h-8.5 w-8.5 items-center justify-center rounded-full bg-white/95 dark:bg-stone-900/95 border border-stone-200/30 dark:border-stone-850/30 text-stone-700 dark:text-stone-300 transition-all duration-350 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-90 shadow-sm hover:text-red-500 cursor-pointer backdrop-blur-xs`}
-          aria-label={favorited ? 'Eliminar de favoritos' : 'Guardar en favoritos'}
+          aria-label={favorited ? t.card.removeFavorite : t.card.saveFavorite}
         >
           <Heart className={`h-4 w-4 transition-colors ${favorited ? 'fill-red-500 text-red-500' : ''}`} />
         </button>
@@ -207,14 +223,14 @@ export default function PropertyCard({ property }: { property: PropertyCardProps
         </h3>
 
         {/* Location */}
-        <p className="text-[11px] font-semibold text-stone-400 dark:text-stone-500">
+        <p className="text-[11px] font-semibold text-stone-450 dark:text-stone-500">
           {property.province}{property.canton ? `, ${property.canton}` : ''}
         </p>
 
         {/* Details stats (Simplified Textual line) */}
         <div className="mt-5 pt-4 border-t border-stone-100/70 dark:border-stone-850/50 flex items-center justify-between">
           <span className="text-[11px] font-semibold text-stone-450 dark:text-stone-400 tracking-wide max-w-[120px] truncate">
-            {specsText || 'Anuncio verificado'}
+            {specsText || t.card.verifiedAd}
             {property.petsAllowed && ' · 🐾'}
           </span>
 
@@ -225,16 +241,16 @@ export default function PropertyCard({ property }: { property: PropertyCardProps
                 href={`tel:+506${cleanPhone}`}
                 onClick={handlePhoneClick}
                 className="w-8 h-8 rounded-full border border-stone-250 dark:border-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-900/50 cursor-pointer flex items-center justify-center transition-all active:scale-90"
-                title="Llamar directamente"
+                title={t.card.callDirectly}
               >
-                <Phone className="h-3.5 w-3.5 text-stone-400 dark:text-stone-500" />
+                <Phone className="h-3.5 w-3.5 text-stone-400 dark:text-stone-550" />
               </a>
 
               {/* Contact WhatsApp Button (Sleek emerald circular CTA) */}
               <button
                 onClick={handleWhatsAppClick}
                 className="w-8 h-8 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer flex items-center justify-center active:scale-90 shadow-sm transition-all duration-300"
-                title="Contactar por WhatsApp"
+                title={t.card.contactWhatsapp}
               >
                 <MessageSquare className="h-3.5 w-3.5" />
               </button>

@@ -1,8 +1,14 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
-import { Home } from 'lucide-react';
+import { useApp } from '@/context/AppContext';
+import { getTranslations } from '@/lib/translations';
 
 export default function Footer() {
+  const { language } = useApp();
+  const t = getTranslations(language);
+
   return (
     <footer className="bg-stone-950 text-stone-400 py-16 border-t border-stone-850">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -20,7 +26,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-sm text-stone-400 max-w-sm leading-relaxed">
-              La plataforma de propiedades de Costa Rica con validación móvil obligatoria y control real contra anuncios duplicados. Encuentra tu espacio con total seriedad.
+              {t.footer.brandDesc}
             </p>
             <div className="pt-4">
               <a
@@ -37,7 +43,7 @@ export default function Footer() {
                   />
                 </div>
                 <div className="flex flex-col items-start leading-tight">
-                  <span className="text-[9px] font-bold text-stone-500 tracking-wider lowercase">desarrollado por</span>
+                  <span className="text-[9px] font-bold text-stone-500 tracking-wider lowercase">{t.footer.developedBy}</span>
                   <span className="font-display font-black text-stone-200 group-hover:text-emerald-450 transition-colors tracking-wide normal-case">
                     Sout<span className="text-emerald-450 group-hover:text-emerald-400">Labs</span>
                   </span>
@@ -49,38 +55,38 @@ export default function Footer() {
 
           {/* Quick links */}
           <div>
-            <h3 className="font-display text-xs font-bold text-stone-300 tracking-widest uppercase mb-4">Provincias Clave</h3>
+            <h3 className="font-display text-xs font-bold text-stone-300 tracking-widest uppercase mb-4">{t.footer.keyProvinces}</h3>
             <ul className="space-y-2.5 text-xs font-medium">
               <li>
-                <Link href="/comprar/san-jose" className="hover:text-white transition-colors">Propiedades en San José</Link>
+                <Link href="/comprar/san-jose" className="hover:text-white transition-colors">{t.footer.propSanJose}</Link>
               </li>
               <li>
-                <Link href="/alquilar/alajuela" className="hover:text-white transition-colors">Alquileres en Alajuela</Link>
+                <Link href="/alquilar/alajuela" className="hover:text-white transition-colors">{t.footer.rentAlajuela}</Link>
               </li>
               <li>
-                <Link href="/comprar/guanacaste" className="hover:text-white transition-colors">Playas en Guanacaste</Link>
+                <Link href="/comprar/guanacaste" className="hover:text-white transition-colors">{t.footer.beachGuanacaste}</Link>
               </li>
               <li>
-                <Link href="/alquilar/heredia" className="hover:text-white transition-colors">Apartamentos en Heredia</Link>
+                <Link href="/alquilar/heredia" className="hover:text-white transition-colors">{t.footer.aptHeredia}</Link>
               </li>
             </ul>
           </div>
 
           {/* Legal / Contact */}
           <div>
-            <h3 className="font-display text-xs font-bold text-stone-300 tracking-widest uppercase mb-4">Plataforma</h3>
+            <h3 className="font-display text-xs font-bold text-stone-300 tracking-widest uppercase mb-4">{t.footer.platform}</h3>
             <ul className="space-y-2.5 text-xs font-medium">
               <li>
-                <Link href="/publicar" className="hover:text-white transition-colors">Publicar una propiedad</Link>
+                <Link href="/publicar" className="hover:text-white transition-colors">{t.common.publish}</Link>
               </li>
               <li>
-                <a href="https://wa.me/50660677055" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Soporte WhatsApp</a>
+                <a href="https://wa.me/50660677055" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">{t.footer.whatsappSupport}</a>
               </li>
               <li>
-                <Link href="/faq" className="hover:text-white transition-colors">Preguntas Frecuentes</Link>
+                <Link href="/faq" className="hover:text-white transition-colors">{t.footer.faq}</Link>
               </li>
               <li>
-                <Link href="/terminos" className="hover:text-white transition-colors">Términos y Condiciones</Link>
+                <Link href="/terminos" className="hover:text-white transition-colors">{t.footer.terms}</Link>
               </li>
             </ul>
           </div>
@@ -89,11 +95,9 @@ export default function Footer() {
         <hr className="border-stone-900 my-10" />
         
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-stone-500">
-          <p>© {new Date().getFullYear()} TicoHabitat. Todos los derechos reservados.</p>
+          <p>© {new Date().getFullYear()} TicoHabitat. {t.footer.rightsReserved}</p>
           <p className="flex items-center gap-1.5">
-            <span>Bienes Raíces de Costa Rica</span>
-            <span className="text-stone-700">|</span>
-            <span>Estilo de vida natural</span>
+            <span>{t.footer.slogan}</span>
           </p>
         </div>
       </div>

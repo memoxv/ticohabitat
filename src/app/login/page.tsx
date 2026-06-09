@@ -4,11 +4,13 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import Link from 'next/link';
-import { KeyRound, Mail, LogIn, Award } from 'lucide-react';
+import { KeyRound, Mail, LogIn } from 'lucide-react';
+import { getTranslations } from '@/lib/translations';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, showToast } = useApp();
+  const { login, showToast, language } = useApp();
+  const t = getTranslations(language);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,7 +19,7 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
-      showToast('Por favor introduce tu correo electrónico.', 'error');
+      showToast(language === 'en' ? 'Please enter your email address.' : 'Por favor introduce tu correo electrónico.', 'error');
       return;
     }
 
@@ -54,20 +56,20 @@ export default function LoginPage() {
         <div className="bg-white dark:bg-stone-900 border border-stone-250/70 dark:border-stone-800 rounded-2xl p-8 sm:p-10 shadow-sm space-y-6">
           <div className="text-center space-y-2">
             <h2 className="font-display text-xl font-extrabold text-stone-900 dark:text-white tracking-tight">
-              Ingresá a tu espacio
+              {t.auth.loginTitle}
             </h2>
             <p className="text-xs text-stone-450 dark:text-stone-500 font-semibold leading-relaxed">
-              Gestioná tus anuncios y favoritos con total tranquilidad.
+              {t.auth.loginSubtitle}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">Correo Electrónico</label>
+              <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">{t.auth.emailLabel}</label>
               <div className="relative">
                 <input
                   type="email"
-                  placeholder="ejemplo@correo.com"
+                  placeholder={language === 'en' ? 'example@email.com' : 'ejemplo@correo.com'}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full rounded-lg border border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-950 px-4 py-2.5 pl-10 text-xs focus:outline-none focus:border-primary text-stone-800 dark:text-stone-100"
@@ -78,12 +80,12 @@ export default function LoginPage() {
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider">Contraseña</label>
+                <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider">{t.auth.passwordLabel}</label>
                 <Link
                   href="/recuperar-contrasena"
-                  className="text-[10px] text-stone-400 dark:text-stone-500 hover:text-primary transition-colors font-bold"
+                  className="text-[10px] text-stone-400 dark:text-stone-550 hover:text-primary transition-colors font-bold"
                 >
-                  ¿Olvidaste tu contraseña?
+                  {t.auth.forgotPassword}
                 </Link>
               </div>
               <div className="relative">
@@ -104,12 +106,12 @@ export default function LoginPage() {
               className="w-full flex items-center justify-center gap-2 rounded-lg bg-stone-950 hover:bg-stone-850 dark:bg-stone-100 dark:hover:bg-stone-250 py-3 text-xs font-bold text-white dark:text-stone-900 shadow-sm disabled:opacity-50 transition-all cursor-pointer"
             >
               <LogIn className="h-4 w-4" />
-              <span>{submitting ? 'Ingresando...' : 'Iniciar Sesión'}</span>
+              <span>{submitting ? (language === 'en' ? 'Logging in...' : 'Ingresando...') : t.auth.submitLogin}</span>
             </button>
           </form>
 
           <p className="text-center text-xs text-stone-400 dark:text-stone-500 mt-6 font-medium">
-            ¿No tiene una cuenta? <Link href="/registro" className="text-primary hover:underline font-bold">Regístrese gratis</Link>
+            {t.auth.noAccount} <Link href="/registro" className="text-primary hover:underline font-bold">{t.auth.registerHere}</Link>
           </p>
 
         </div>

@@ -2,7 +2,9 @@ import React from 'react';
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { db } from '@/lib/db';
-import { Building2, Search, Building, Sparkles, MapPin, Mail, ArrowRight } from 'lucide-react';
+import { Building2, Search, Building, MapPin, Mail, ArrowRight } from 'lucide-react';
+import { getTranslations } from '@/lib/translations';
+import { getServerLanguage } from '@/lib/serverTranslations';
 
 export const revalidate = 0; // Dynamic content always
 
@@ -19,6 +21,9 @@ interface AgenciasPageProps {
 }
 
 export default async function AgenciasPage({ searchParams }: AgenciasPageProps) {
+  const lang = await getServerLanguage();
+  const t = getTranslations(lang);
+
   const resolvedSearchParams = await searchParams;
   const search = resolvedSearchParams.search || '';
 
@@ -116,9 +121,9 @@ export default async function AgenciasPage({ searchParams }: AgenciasPageProps) 
         
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs font-bold text-stone-400 dark:text-stone-550 mb-8 uppercase tracking-wider">
-          <Link href="/" className="hover:text-primary transition-colors">Inicio</Link>
+          <Link href="/" className="hover:text-primary transition-colors">{t.common.home}</Link>
           <span>/</span>
-          <span className="text-stone-600 dark:text-stone-300">Inmobiliarias</span>
+          <span className="text-stone-600 dark:text-stone-300">{t.agencias.breadcrumb}</span>
         </div>
 
         {/* Header Block */}
@@ -126,13 +131,13 @@ export default async function AgenciasPage({ searchParams }: AgenciasPageProps) 
           <div className="max-w-xl space-y-3">
             <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-450 bg-emerald-500/10 dark:bg-emerald-500/5 px-2.5 py-1 rounded-md">
               <Building className="h-3.5 w-3.5 text-emerald-600" />
-              <span>Corredores Autorizados</span>
+              <span>{t.agencias.authorizedBrokers}</span>
             </span>
             <h1 className="font-display text-4xl font-extrabold text-stone-900 dark:text-white tracking-tight leading-tight">
-              Directorio de <span className="text-emerald-600">Inmobiliarias</span>
+              {lang === 'en' ? 'Real Estate ' : 'Directorio de '}<span className="text-emerald-600">{lang === 'en' ? 'Agencies' : 'Inmobiliarias'}</span>
             </h1>
             <p className="text-sm font-medium text-stone-500 dark:text-stone-400 leading-relaxed">
-              Conéctese con las inmobiliarias verificadas más influyentes de Costa Rica. Asesores profesionales de alto nivel listos para guiarle.
+              {t.agencias.subtitle}
             </p>
           </div>
 
@@ -143,7 +148,7 @@ export default async function AgenciasPage({ searchParams }: AgenciasPageProps) 
                 type="text"
                 name="search"
                 defaultValue={search}
-                placeholder="Buscar por agencia..."
+                placeholder={t.agencias.searchPlaceholder}
                 className="w-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-850 rounded-xl py-2.5 pl-10 pr-4 text-xs focus:outline-none focus:border-emerald-500 text-stone-800 dark:text-white"
               />
               <Search className="absolute left-3.5 top-3 h-4 w-4 text-stone-400" />
@@ -152,7 +157,7 @@ export default async function AgenciasPage({ searchParams }: AgenciasPageProps) 
               type="submit"
               className="bg-stone-900 hover:bg-stone-850 dark:bg-stone-100 dark:hover:bg-stone-200 text-white dark:text-stone-900 text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer shadow-sm transition-all"
             >
-              Filtrar
+              {t.agencias.filterBtn}
             </button>
           </form>
         </div>
@@ -186,7 +191,7 @@ export default async function AgenciasPage({ searchParams }: AgenciasPageProps) 
                         {agency.agencyName}
                       </h3>
                       <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider mt-0.5">
-                        Agencia Verificada
+                        {t.agencias.verifiedAgency}
                       </p>
                     </div>
                   </div>
@@ -195,7 +200,7 @@ export default async function AgenciasPage({ searchParams }: AgenciasPageProps) 
                   <div className="space-y-2 border-t border-stone-100 dark:border-stone-850/60 pt-4 mb-6">
                     <div className="flex items-center gap-2 text-[11px] font-medium text-stone-500 dark:text-stone-400">
                       <MapPin className="h-3.5 w-3.5 text-stone-400 shrink-0" />
-                      <span>Costa Rica (Nacional)</span>
+                      <span>{t.agencias.nationalScope}</span>
                     </div>
                     <div className="flex items-center gap-2 text-[11px] font-medium text-stone-500 dark:text-stone-400">
                       <Mail className="h-3.5 w-3.5 text-stone-400 shrink-0" />
@@ -207,24 +212,24 @@ export default async function AgenciasPage({ searchParams }: AgenciasPageProps) 
                 {/* Bottom stats and link */}
                 <div className="space-y-4 pt-4 border-t border-stone-100 dark:border-stone-850/60">
                   <div className="flex items-center justify-between text-[10px] font-black uppercase text-stone-450 tracking-wider">
-                    <span>👥 Colaboradores</span>
+                    <span>👥 {t.agencias.collaborators}</span>
                     <span className="text-stone-700 dark:text-stone-300">
-                      {1 + agency.agentsCount} {1 + agency.agentsCount === 1 ? 'Agente' : 'Agentes'}
+                      {1 + agency.agentsCount} {1 + agency.agentsCount === 1 ? t.agencias.agent : t.agencias.agents}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between text-[10px] font-black uppercase text-stone-450 tracking-wider">
-                    <span>🏠 Listados Activos</span>
+                    <span>🏠 {t.agencias.activeListings}</span>
                     <span className="text-emerald-700 dark:text-emerald-450 font-black">
-                      {agency.activeListingsCount} {agency.activeListingsCount === 1 ? 'Anuncio' : 'Anuncios'}
+                      {agency.activeListingsCount} {agency.activeListingsCount === 1 ? t.agencias.ad : t.agencias.ads}
                     </span>
                   </div>
 
                   <Link
                     href={`/comprar?search=${encodeURIComponent(agency.agencyName || '')}`}
-                    className="w-full mt-2 inline-flex items-center justify-center gap-1.5 py-3 border border-stone-200 dark:border-stone-800 hover:border-emerald-500/25 bg-stone-50/50 dark:bg-stone-900/10 hover:bg-emerald-500/5 hover:text-emerald-700 dark:hover:text-emerald-400 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider text-stone-600 dark:text-stone-300 transition-all cursor-pointer shadow-xs active:scale-[0.985]"
+                    className="w-full mt-2 inline-flex items-center justify-center gap-1.5 py-3 border border-stone-200 dark:border-stone-800 hover:border-emerald-500/25 bg-stone-50/50 dark:bg-stone-900/10 hover:bg-emerald-500/5 hover:text-emerald-700 dark:hover:text-emerald-450 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider text-stone-650 dark:text-stone-300 transition-all cursor-pointer shadow-xs active:scale-[0.985]"
                   >
-                    <span>Ver Propiedades</span>
+                    <span>{t.agencias.viewProperties}</span>
                     <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                   </Link>
                 </div>
@@ -234,9 +239,9 @@ export default async function AgenciasPage({ searchParams }: AgenciasPageProps) 
         ) : (
           <div className="flex flex-col items-center justify-center text-center p-16 bg-card-bg border border-dashed border-card-border rounded-2xl shadow-sm">
             <Building2 className="h-12 w-12 text-stone-300 dark:text-stone-750 mb-3 animate-pulse" />
-            <h3 className="font-display font-bold text-lg text-stone-850 dark:text-stone-200">No se encontraron agencias</h3>
-            <p className="text-xs text-stone-450 dark:text-stone-500 mt-1 max-w-sm leading-relaxed">
-              No existen inmobiliarias registradas con membresía activa que coincidan con la búsqueda. Intente con otro término.
+            <h3 className="font-display font-bold text-lg text-stone-850 dark:text-stone-200">{t.agencias.emptyTitle}</h3>
+            <p className="text-xs text-stone-450 dark:text-stone-555 mt-1 max-w-sm leading-relaxed">
+              {t.agencias.emptyDesc}
             </p>
           </div>
         )}

@@ -7,6 +7,7 @@ import { useApp } from '@/context/AppContext';
 import { sendOtp, verifyOtp } from '@/app/actions/otp';
 import { createPropertyAction, PropertySubmitData, getUserPropertiesCountAction } from '@/app/actions/properties';
 import { groupFeaturesByCategory, FEATURE_CATEGORIES, MASTER_FEATURES } from '@/lib/attributes';
+import { getTranslations, getFeatureLabel, getCategoryLabel } from '@/lib/translations';
 import {
   Sparkles,
   Camera,
@@ -39,7 +40,8 @@ const PROPERTY_TYPES = [
 
 export default function PublicarPage() {
   const router = useRouter();
-  const { user, login, showToast, phoneVerified, verifyPhoneInSession, refreshSession } = useApp();
+  const { user, login, showToast, phoneVerified, verifyPhoneInSession, refreshSession, language } = useApp();
+  const t = getTranslations(language);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [step, setStep] = useState(1);
@@ -88,28 +90,14 @@ export default function PublicarPage() {
   });
 
   const getStep2Texts = () => {
+    const s2 = t.publish.step2;
     switch (formData.propertyType) {
       case 'lot':
-        return {
-          title: 'Describí las dimensiones y entorno de tu lote',
-          description: 'Compartí los detalles que hacen único a este terreno: su topografía, acceso a servicios públicos, vistas y entorno natural.',
-          placeholderTitle: 'Ej: Excelente lote plano listo para construir, San Isidro de Heredia',
-          placeholderDesc: 'Describa brevemente la topografía del lote, disponibilidad de servicios públicos, uso de suelo, accesos y conveniencia de la zona...'
-        };
+        return s2.lot;
       case 'commercial':
-        return {
-          title: 'Describí los detalles de tu local o bodega',
-          description: 'Compartí las especificaciones del inmueble comercial: su visibilidad, capacidad de carga, accesos, baños, parqueos y potencial de negocio.',
-          placeholderTitle: 'Ej: Amplio local comercial con excelente punto comercial, Barrio Escalante',
-          placeholderDesc: 'Describa brevemente la distribución del local, facilidades de parqueo para clientes, seguridad de la bodega y conveniencia del punto...'
-        };
+        return s2.commercial;
       default:
-        return {
-          title: 'Describí los rincones de tu hogar',
-          description: 'Compartí los detalles que hacen único a este espacio: su distribución, entorno natural y calidez.',
-          placeholderTitle: 'Ej: Hermoso apartamento con jardín privado, Curridabat',
-          placeholderDesc: 'Describa brevemente las ventajas de la propiedad, amenidades y conveniencia de la zona...'
-        };
+        return s2.default;
     }
   };
 
@@ -312,7 +300,7 @@ export default function PublicarPage() {
     const currentImages = formData.imageUrls || [];
     const remainingSlots = 15 - currentImages.length;
     if (remainingSlots <= 0) {
-      showToast('Ya has cargado el máximo de 15 fotografías permitidas.', 'error');
+      showToast(t.publish.toasts.maxPhotos, 'error');
       return;
     }
 
@@ -327,7 +315,7 @@ export default function PublicarPage() {
         compressedStrings.push(compressed);
       } catch (err) {
         console.error('Error compressing file', err);
-        showToast('Error al procesar la imagen.', 'error');
+        showToast(language === 'en' ? 'Error processing the image.' : 'Error al procesar la imagen.', 'error');
       }
       setCompressionProgress(Math.round(((i + 1) / filesToUpload.length) * 100));
     }
@@ -338,13 +326,13 @@ export default function PublicarPage() {
     }));
 
     setCompressing(false);
-    showToast(`Se cargaron y optimizaron ${compressedStrings.length} imágenes.`, 'success');
+    showToast(t.publish.toasts.compressedOk.replace('{count}', String(compressedStrings.length)), 'success');
   };
 
   const removeImage = (idx: number) => {
     const nextImages = (formData.imageUrls || []).filter((_, i) => i !== idx);
     setFormData({ ...formData, imageUrls: nextImages });
-    showToast('Imagen eliminada de la secuencia.', 'info');
+    showToast(t.publish.toasts.removedPhoto, 'info');
   };
 
   const moveImage = (idx: number, direction: 'prev' | 'next') => {
@@ -369,36 +357,36 @@ export default function PublicarPage() {
     list.unshift(target);
 
     setFormData({ ...formData, imageUrls: list });
-    showToast('Imagen establecida como portada principal.', 'success');
+    showToast(t.publish.toasts.coverSetOk, 'success');
   };
 
   // 3. Step validation
   const validateStep = (s: number): boolean => {
     if (s === 1) {
       if (Number(formData.price) <= 0) {
-        showToast('Por favor introduce un precio de salida válido superior a cero.', 'error');
+        showToast(t.publish.form.priceMinWarning, 'error');
         return false;
       }
       return true;
     }
     if (s === 2) {
       if (!formData.title || formData.title.trim().length < 10) {
-        showToast('El título del anuncio debe tener al menos 10 caracteres para ser descriptivo.', 'error');
+        showToast(t.publish.toasts.titleLengthError, 'error');
         return false;
       }
       if (!formData.description || formData.description.trim().length < 30) {
-        showToast('La descripción detallada debe tener al menos 30 caracteres para informar correctamente.', 'error');
+        showToast(t.publish.toasts.descLengthError, 'error');
         return false;
       }
       if (Number(formData.areaM2) <= 0) {
-        showToast('Por favor introduzca el área en metros cuadrados de la propiedad.', 'error');
+        showToast(t.publish.toasts.areaError, 'error');
         return false;
       }
       return true;
     }
     if (s === 3) {
       if (!formData.imageUrls || formData.imageUrls.length === 0) {
-        showToast('Es obligatorio subir al menos 1 foto real para publicar el anuncio.', 'error');
+        showToast(t.publish.toasts.photoError, 'error');
         return false;
       }
       return true;
@@ -419,7 +407,7 @@ export default function PublicarPage() {
   // 4. Request simulated WhatsApp OTP
   const handleRequestOtp = async () => {
     if (!formData.contactPhone || formData.contactPhone.length < 8) {
-      showToast('Por favor introduce un número de teléfono móvil válido antes de solicitar el código.', 'error');
+      showToast(t.publish.toasts.phoneLengthError, 'error');
       return;
     }
 
@@ -443,7 +431,7 @@ export default function PublicarPage() {
   // 5. Verify simulated OTP
   const handleVerifyOtpSubmit = async () => {
     if (otpCode.length < 6) {
-      showToast('Por favor introduce el código OTP completo de 6 dígitos.', 'error');
+      showToast(t.publish.toasts.otpLengthError, 'error');
       return;
     }
 
@@ -480,14 +468,14 @@ export default function PublicarPage() {
     } catch (err) {
       console.error(err);
       setSendingEmailOtp(false);
-      showToast('Error al solicitar el código OTP por correo.', 'error');
+      showToast(language === 'en' ? 'Error requesting OTP code via email.' : 'Error al solicitar el código OTP por correo.', 'error');
     }
   };
 
   // 5.6. Verify Email OTP code
   const handleVerifyEmailOtpSubmit = async () => {
     if (emailOtpCode.length < 6) {
-      showToast('Por favor introduce el código OTP completo de 6 dígitos.', 'error');
+      showToast(t.publish.toasts.otpLengthError, 'error');
       return;
     }
 
@@ -507,7 +495,7 @@ export default function PublicarPage() {
     } catch (err) {
       console.error(err);
       setVerifyingEmailOtp(false);
-      showToast('Error al verificar el código OTP.', 'error');
+      showToast(language === 'en' ? 'Error verifying OTP code.' : 'Error al verificar el código OTP.', 'error');
     }
   };
 
@@ -515,14 +503,14 @@ export default function PublicarPage() {
   const handlePublishProperty = async () => {
     // Double check user session
     if (!user) {
-      showToast('Debes estar registrado e iniciar sesión para publicar.', 'error');
+      showToast(t.publish.toasts.sessionError, 'error');
       router.push('/login');
       return;
     }
 
     const cleanPhone = (formData.contactPhone || '').replace(/\D/g, '').slice(-8);
     if (cleanPhone.length !== 8) {
-      showToast('Debe ingresar un número de teléfono celular de 8 dígitos para publicar.', 'error');
+      showToast(t.publish.toasts.phoneDigitError, 'error');
       return;
     }
 
@@ -554,7 +542,7 @@ export default function PublicarPage() {
       <div className="flex-grow bg-stone-50/20 dark:bg-stone-950/20 py-20 flex flex-col items-center justify-center animate-fadeIn">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-stone-300 border-t-stone-850 dark:border-stone-800 dark:border-t-white" />
-          <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">Verificando suscripción...</p>
+          <p className="text-[10px] font-bold text-stone-400 dark:text-stone-550 uppercase tracking-widest">{t.publish.subscriptionCheck}</p>
         </div>
       </div>
     );
@@ -570,9 +558,9 @@ export default function PublicarPage() {
             </div>
 
             <div className="space-y-2">
-              <h2 className="font-display text-2xl font-extrabold text-stone-900 dark:text-white tracking-tight">Registro Requerido</h2>
+              <h2 className="font-display text-2xl font-extrabold text-stone-900 dark:text-white tracking-tight">{t.publish.regRequired}</h2>
               <p className="text-xs text-stone-550 dark:text-stone-400 font-bold leading-relaxed">
-                Para garantizar la seguridad, legitimidad y seriedad del marketplace, debes tener una cuenta en la plataforma antes de publicar propiedades.
+                {t.publish.regDesc}
               </p>
             </div>
 
@@ -581,13 +569,13 @@ export default function PublicarPage() {
                 href="/login"
                 className="btn-primary py-3 text-xs flex items-center justify-center gap-2 cursor-pointer shadow-sm w-full"
               >
-                <span>Iniciar Sesión</span>
+                <span>{t.publish.loginBtn}</span>
               </Link>
               <Link
                 href="/registro"
                 className="btn-secondary py-3 text-xs flex items-center justify-center gap-2 cursor-pointer shadow-sm w-full"
               >
-                <span>Crear Cuenta Gratis</span>
+                <span>{t.publish.registerBtn}</span>
               </Link>
             </div>
           </div>
@@ -606,9 +594,9 @@ export default function PublicarPage() {
             </div>
 
             <div className="space-y-2">
-              <h2 className="font-display text-2xl font-extrabold text-stone-900 dark:text-white tracking-tight">Verificá tu Correo Electrónico</h2>
+              <h2 className="font-display text-2xl font-extrabold text-stone-900 dark:text-white tracking-tight">{t.publish.verifyEmailTitle}</h2>
               <p className="text-xs text-stone-550 dark:text-stone-400 font-semibold leading-relaxed">
-                Antes de publicar tu primer espacio en Costa Rica, necesitamos verificar tu identidad. Habilita tu cuenta mediante enlace seguro o código OTP enviado a tu correo:
+                {t.publish.verifyEmailDesc}
               </p>
               <div className="text-xs font-mono font-bold text-stone-700 dark:text-stone-300 bg-stone-50 dark:bg-stone-950 p-2 rounded border border-stone-200 dark:border-stone-850 mt-1 max-w-xs mx-auto">
                 📧 {user.email}
@@ -620,9 +608,9 @@ export default function PublicarPage() {
               <div className="border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-950/60 text-stone-700 dark:text-stone-300 rounded-xl p-5 text-xs max-w-sm mx-auto flex flex-col items-center gap-2.5 shadow-inner">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-450 tracking-wider uppercase">
                   <Sparkles className="h-4 w-4 animate-pulse text-amber-500" />
-                  <span>Email OTP Simulador Bot:</span>
+                  <span>{t.publish.emailConsoleTitle}</span>
                 </div>
-                <div className="text-center font-medium">Código OTP transaccional enviado a tu correo:</div>
+                <div className="text-center font-medium">{t.publish.emailConsoleDesc}</div>
                 <div className="text-2xl font-mono tracking-widest font-black text-stone-950 dark:text-stone-100 bg-white dark:bg-stone-900 px-4.5 py-1.5 rounded border border-stone-200 dark:border-stone-850 shadow-inner mt-1">
                   {devEmailOtpLog}
                 </div>
@@ -634,9 +622,9 @@ export default function PublicarPage() {
               <div className="border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-950/60 text-stone-700 dark:text-stone-300 rounded-xl p-5 text-xs max-w-sm mx-auto flex flex-col items-center gap-2.5 shadow-inner">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-450 tracking-wider uppercase">
                   <Sparkles className="h-4 w-4 animate-pulse text-amber-500" />
-                  <span>Enlace de Verificación Simulador Bot:</span>
+                  <span>{t.publish.emailLinkConsoleTitle}</span>
                 </div>
-                <div className="text-center font-medium">Enlace seguro transaccional (Copia y pega):</div>
+                <div className="text-center font-medium">{t.publish.emailLinkConsoleDesc}</div>
                 <div className="text-[10px] font-mono select-all break-all text-stone-300 bg-white dark:bg-stone-900 p-2.5 rounded border border-stone-200 dark:border-stone-850 shadow-inner mt-1 w-full text-left">
                   {emailVerificationLink}
                 </div>
@@ -667,13 +655,13 @@ export default function PublicarPage() {
                   disabled={sendingEmail}
                   className="btn-primary w-full py-3.5 text-xs cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
                 >
-                  {sendingEmail ? 'Enviando...' : 'Recibir Enlace de Verificación'}
+                  {sendingEmail ? t.publish.sendingLink : t.publish.receiveLinkBtn}
                 </button>
               </div>
 
               <div className="relative flex py-2 items-center">
                 <div className="flex-grow border-t border-stone-250/30 dark:border-stone-800"></div>
-                <span className="flex-shrink mx-4 text-[9px] font-bold text-stone-400 dark:text-stone-550 uppercase tracking-widest">O valida usando OTP</span>
+                <span className="flex-shrink mx-4 text-[9px] font-bold text-stone-400 dark:text-stone-555 uppercase tracking-widest">{t.publish.orVerifyOtp}</span>
                 <div className="flex-grow border-t border-stone-250/30 dark:border-stone-800"></div>
               </div>
 
@@ -686,14 +674,14 @@ export default function PublicarPage() {
                     disabled={sendingEmailOtp}
                     className="btn-secondary w-full py-3.5 text-xs cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
                   >
-                    {sendingEmailOtp ? 'Enviando OTP...' : 'Solicitar Código OTP por Correo'}
+                    {sendingEmailOtp ? t.publish.sendingOtp : t.publish.requestEmailOtpBtn}
                   </button>
                 ) : (
                   <div className="space-y-3">
                     <input
                       type="text"
                       maxLength={6}
-                      placeholder="Introduce el código OTP de 6 dígitos"
+                      placeholder={t.publish.otpPlaceholder}
                       value={emailOtpCode}
                       onChange={(e) => setEmailOtpCode(e.target.value.replace(/\D/g, ''))}
                       className="input-premium py-3 text-center font-mono tracking-widest"
@@ -706,7 +694,7 @@ export default function PublicarPage() {
                         disabled={sendingEmailOtp}
                         className="btn-secondary flex-1 py-3 text-xs cursor-pointer disabled:opacity-50"
                       >
-                        Reenviar
+                        {t.publish.resendBtn}
                       </button>
                       <button
                         type="button"
@@ -714,7 +702,7 @@ export default function PublicarPage() {
                         disabled={verifyingEmailOtp || emailOtpCode.length < 6}
                         className="btn-primary flex-1 py-3 text-xs cursor-pointer disabled:opacity-50"
                       >
-                        {verifyingEmailOtp ? 'Verificando...' : 'Verificar OTP'}
+                        {verifyingEmailOtp ? t.publish.verifying : t.publish.verifyOtpBtn}
                       </button>
                     </div>
                   </div>
@@ -740,17 +728,17 @@ export default function PublicarPage() {
             </div>
 
             <div className="space-y-2">
-              <h2 className="font-display text-2xl font-extrabold text-stone-900 dark:text-white tracking-tight">Límite de Anuncios</h2>
+              <h2 className="font-display text-2xl font-extrabold text-stone-900 dark:text-white tracking-tight">{t.publish.limitTitle}</h2>
               <p className="text-xs text-stone-550 dark:text-stone-400 font-bold leading-relaxed">
-                Has alcanzado el límite máximo de <span className="text-emerald-700 dark:text-emerald-450 font-black">3 anuncios activos o pendientes</span> permitidos en la versión gratuita de TicoHabitat.
+                {t.publish.limitDesc.replace('{count}', String(propertiesCount))}
               </p>
             </div>
 
             <div className="p-4 rounded-lg bg-stone-50 dark:bg-stone-950/40 border border-stone-200/50 dark:border-stone-800 text-left text-[11px] font-bold text-stone-600 dark:text-stone-400 space-y-1.5">
-              <p>Para seguir publicando tienes dos opciones:</p>
+              <p>{t.publish.limitOptions}</p>
               <ul className="list-disc pl-4 space-y-1">
-                <li>Ir a tu Panel de Control y archivar o eliminar anuncios antiguos.</li>
-                <li>Contactar con nuestro equipo para adquirir un Plan Premium Ilimitado.</li>
+                <li>{t.publish.limitOption1}</li>
+                <li>{t.publish.limitOption2}</li>
               </ul>
             </div>
 
@@ -759,7 +747,7 @@ export default function PublicarPage() {
                 href="/dashboard"
                 className="btn-primary py-3 text-xs flex items-center justify-center gap-2 cursor-pointer shadow-sm w-full"
               >
-                <span>Ir a mi Panel de Control</span>
+                <span>{t.publish.limitGoDashboard}</span>
               </Link>
               <a
                 href="https://wa.me/50688888888?text=Hola!%20Me%20interesa%20adquirir%20un%20Plan%20Premium%20para%20publicar%20mas%20de%203%20propiedades%20en%20TicoHabitat."
@@ -767,7 +755,7 @@ export default function PublicarPage() {
                 rel="noreferrer"
                 className="btn-whatsapp py-3 text-xs flex items-center justify-center gap-2 cursor-pointer shadow-sm w-full"
               >
-                <span>Adquirir Plan Premium</span>
+                <span>{t.publish.limitAcquirePremium}</span>
               </a>
             </div>
           </div>
@@ -783,8 +771,8 @@ export default function PublicarPage() {
         {/* Step Indicator Panel - Beautifully Refactored Progress Bar */}
         <div className="mb-10">
           <div className="flex items-center justify-between text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest mb-3">
-            <span>Paso {step} de 4</span>
-            <span className="text-primary font-black">{Math.round(((step - 1) / 3) * 100)}% Completado</span>
+            <span>{t.publish.wizardStep.replace('{step}', String(step))}</span>
+            <span className="text-primary font-black">{t.publish.completed.replace('{pct}', String(Math.round(((step - 1) / 3) * 100)))}</span>
           </div>
 
           <div className="h-[3px] w-full bg-stone-200 dark:bg-stone-850 rounded-full overflow-hidden">
@@ -795,10 +783,10 @@ export default function PublicarPage() {
           </div>
 
           <div className="grid grid-cols-4 gap-2 mt-4 text-center text-[9px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider">
-            <span className={`transition-colors ${step >= 1 ? 'text-primary font-black' : ''}`}>1. Tipo</span>
-            <span className={`transition-colors ${step >= 2 ? 'text-primary font-black' : ''}`}>2. Detalles</span>
-            <span className={`transition-colors ${step >= 3 ? 'text-primary font-black' : ''}`}>3. Fotos</span>
-            <span className={`transition-colors ${step >= 4 ? 'text-primary font-black' : ''}`}>4. Publicar</span>
+            <span className={`transition-colors ${step >= 1 ? 'text-primary font-black' : ''}`}>{t.publish.steps.type}</span>
+            <span className={`transition-colors ${step >= 2 ? 'text-primary font-black' : ''}`}>{t.publish.steps.details}</span>
+            <span className={`transition-colors ${step >= 3 ? 'text-primary font-black' : ''}`}>{t.publish.steps.photos}</span>
+            <span className={`transition-colors ${step >= 4 ? 'text-primary font-black' : ''}`}>{t.publish.steps.contact}</span>
           </div>
         </div>
 
@@ -809,8 +797,12 @@ export default function PublicarPage() {
           {step === 1 && (
             <div className="space-y-6 animate-fadeIn">
               <div>
-                <h2 className="font-display text-2xl font-extrabold text-stone-900 dark:text-white tracking-tight">Comencemos a preparar tu anuncio</h2>
-                <p className="text-xs text-stone-450 mt-1.5 font-semibold">Elegí la modalidad bajo la cual querés listar tu espacio. Conectamos de forma directa, tranquila y transparente.</p>
+                <h2 className="font-display text-2xl font-extrabold text-stone-900 dark:text-white tracking-tight">
+                  {t.publish.step1.title}
+                </h2>
+                <p className="text-xs text-stone-450 mt-1.5 font-semibold">
+                  {t.publish.step1.desc}
+                </p>
               </div>
 
               {/* Giant Transaction Choice Buttons */}
@@ -823,8 +815,10 @@ export default function PublicarPage() {
                       : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-450 hover:border-stone-300'
                     }`}
                 >
-                  <span className="font-display font-black text-base">Alquilar</span>
-                  <span className="text-[9px] font-bold text-stone-450 dark:text-stone-500 mt-1.5 uppercase tracking-wider">Mensualidad regular</span>
+                  <span className="font-display font-black text-base">{t.common.rent}</span>
+                  <span className="text-[9px] font-bold text-stone-450 dark:text-stone-500 mt-1.5 uppercase tracking-wider">
+                    {t.publish.step1.rentBtnSub}
+                  </span>
                 </button>
 
                 <button
@@ -835,14 +829,16 @@ export default function PublicarPage() {
                       : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-stone-450 hover:border-stone-300'
                     }`}
                 >
-                  <span className="font-display font-black text-base">Vender</span>
-                  <span className="text-[9px] font-bold text-stone-450 dark:text-stone-500 mt-1.5 uppercase tracking-wider">Traspaso absoluto</span>
+                  <span className="font-display font-black text-base">{t.publish.step1.sellBtn}</span>
+                  <span className="text-[9px] font-bold text-stone-450 dark:text-stone-500 mt-1.5 uppercase tracking-wider">
+                    {t.publish.step1.sellBtnSub}
+                  </span>
                 </button>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">Provincia</label>
+                  <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">{t.publish.form.provinceLabel}</label>
                   <select
                     name="province"
                     value={formData.province}
@@ -856,41 +852,42 @@ export default function PublicarPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">Tipo de Inmueble</label>
+                  <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">{t.publish.form.propertyTypeLabel}</label>
                   <select
                     name="propertyType"
                     value={formData.propertyType}
                     onChange={handleChange}
                     className="input-premium py-3 cursor-pointer"
                   >
-                    {PROPERTY_TYPES.map((t) => (
-                      <option key={t.value} value={t.value}>{t.label}</option>
-                    ))}
+                    {PROPERTY_TYPES.map((typeObj) => {
+                      const localizedLabel = t.card.propertyTypes[typeObj.value as keyof typeof t.card.propertyTypes] || typeObj.label;
+                      return <option key={typeObj.value} value={typeObj.value}>{localizedLabel}</option>;
+                    })}
                   </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">Moneda</label>
+                  <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">{t.publish.step1.currencyLabel}</label>
                   <select
                     name="currency"
                     value={formData.currency}
                     onChange={handleChange}
                     className="input-premium py-3 cursor-pointer"
                   >
-                    <option value="CRC">Colones (₡)</option>
-                    <option value="USD">Dólares ($)</option>
+                    <option value="CRC">{t.publish.form.currencyCRC}</option>
+                    <option value="USD">{t.publish.form.currencyUSD}</option>
                   </select>
                 </div>
 
                 <div className="col-span-2">
-                  <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">Precio de Salida</label>
+                  <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">{t.publish.form.priceLabel}</label>
                   <input
                     type="number"
                     name="price"
                     value={formData.price ?? ''}
-                    placeholder="Monto de venta o mensualidad"
+                    placeholder={t.publish.step1.pricePlaceholder}
                     onChange={handleChange}
                     onKeyDown={(e) => {
                       if (['e', 'E', '+', '-'].includes(e.key)) {
@@ -913,7 +910,7 @@ export default function PublicarPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">Título del Anuncio</label>
+                <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">{t.publish.form.detailTitleLabel}</label>
                 <input
                   type="text"
                   name="title"
@@ -925,7 +922,7 @@ export default function PublicarPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">Descripción Completa</label>
+                <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">{t.publish.form.detailDescLabel}</label>
                 <textarea
                   name="description"
                   placeholder={step2Texts.placeholderDesc}
@@ -945,7 +942,7 @@ export default function PublicarPage() {
 
                 {formData.propertyType !== 'lot' && formData.propertyType !== 'commercial' && (
                   <div>
-                    <label className="block text-[9px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2 text-center">Habitaciones</label>
+                    <label className="block text-[9px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2 text-center">{t.publish.form.bedroomsLabel}</label>
                     <input
                       type="number"
                       name="bedrooms"
@@ -963,7 +960,7 @@ export default function PublicarPage() {
 
                 {formData.propertyType !== 'lot' && (
                   <div>
-                    <label className="block text-[9px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2 text-center">Baños</label>
+                    <label className="block text-[9px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2 text-center">{t.publish.form.bathroomsLabel}</label>
                     <input
                       type="number"
                       name="bathrooms"
@@ -981,7 +978,7 @@ export default function PublicarPage() {
 
                 {formData.propertyType !== 'lot' && (
                   <div>
-                    <label className="block text-[9px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2 text-center">Parqueos</label>
+                    <label className="block text-[9px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2 text-center">{t.publish.form.parkingLabel}</label>
                     <input
                       type="number"
                       name="parkingSpaces"
@@ -998,7 +995,7 @@ export default function PublicarPage() {
                 )}
 
                 <div>
-                  <label className="block text-[9px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2 text-center">Área (m²)</label>
+                  <label className="block text-[9px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2 text-center">{t.publish.form.areaLabel.split(' ')[0]}</label>
                   <input
                     type="number"
                     name="areaM2"
@@ -1017,8 +1014,12 @@ export default function PublicarPage() {
               {/* Dynamic Contextual Features Section */}
               <div className="border-t border-stone-150 dark:border-stone-800/80 pt-6 mt-6 space-y-6">
                 <div>
-                  <h3 className="font-display font-bold text-sm text-stone-850 dark:text-stone-150 tracking-tight">Detalles que brindan bienestar</h3>
-                  <p className="text-[11px] text-stone-450 dark:text-stone-500 mt-1 font-semibold">Seleccioná las características y amenidades que aportan tranquilidad y calidad de vida.</p>
+                  <h3 className="font-display font-bold text-sm text-stone-850 dark:text-stone-150 tracking-tight">
+                    {t.publish.detailsHeading}
+                  </h3>
+                  <p className="text-[11px] text-stone-450 dark:text-stone-500 mt-1 font-semibold">
+                    {t.publish.detailsSub}
+                  </p>
                 </div>
 
                 <div className="space-y-5">
@@ -1028,15 +1029,18 @@ export default function PublicarPage() {
 
                     if (visibleFeatures.length === 0) return null;
 
+                    const categoryLabelText = getCategoryLabel(categoryKey, language);
+
                     return (
                       <div key={categoryKey} className="space-y-2 animate-fadeIn">
                         <h4 className="text-[9px] font-black uppercase tracking-wider text-stone-400 dark:text-stone-550">
-                          {FEATURE_CATEGORIES[categoryKey]}
+                          {categoryLabelText}
                         </h4>
 
                         <div className="flex flex-wrap gap-2">
                           {visibleFeatures.map((feat) => {
                             const isChecked = (formData.features || []).includes(feat.key);
+                            const featureLabelText = getFeatureLabel(feat.key, feat.label, language);
                             return (
                               <button
                                 key={feat.key}
@@ -1044,11 +1048,11 @@ export default function PublicarPage() {
                                 onClick={() => handleToggleFeature(feat.key)}
                                 className={`flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-bold transition-all cursor-pointer select-none active:scale-[0.97] ${isChecked
                                     ? 'bg-primary-light/45 border-primary text-primary dark:bg-primary-light/10 shadow-sm'
-                                    : 'bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-stone-650 dark:text-stone-405 hover:border-stone-300'
+                                    : 'bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-stone-650 dark:text-stone-400 hover:border-stone-300'
                                   }`}
                               >
                                 {isChecked && <Check className="h-3.5 w-3.5 shrink-0" />}
-                                <span>{feat.label}</span>
+                                <span>{featureLabelText}</span>
                               </button>
                             );
                           })}
@@ -1066,7 +1070,7 @@ export default function PublicarPage() {
                       onClick={() => setShowAllFeatures(!showAllFeatures)}
                       className="btn-secondary py-2 px-4 text-xs inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
                     >
-                      <span>{showAllFeatures ? 'Ocultar opciones avanzadas' : 'Ver más opciones avanzadas'}</span>
+                      <span>{showAllFeatures ? (language === 'en' ? 'Hide advanced options' : 'Ocultar opciones avanzadas') : (language === 'en' ? 'Show more advanced options' : 'Ver más opciones avanzadas')}</span>
                       <ChevronDown className={`h-4 w-4 transition-transform ${showAllFeatures ? 'rotate-180' : ''}`} />
                     </button>
                   </div>
@@ -1079,8 +1083,8 @@ export default function PublicarPage() {
           {step === 3 && (
             <div className="space-y-6 animate-fadeIn">
               <div>
-                <h2 className="font-display text-2xl font-extrabold text-stone-900 dark:text-white tracking-tight">Fotografías con calma y luz natural</h2>
-                <p className="text-xs text-stone-450 dark:text-stone-500 mt-1.5 font-semibold">Mostrá la propiedad tal como es: sus jardines, luz del día e integración con el entorno. Evitá imágenes artificiales.</p>
+                <h2 className="font-display text-2xl font-extrabold text-stone-900 dark:text-white tracking-tight">{t.publish.step3.title}</h2>
+                <p className="text-xs text-stone-450 dark:text-stone-500 mt-1.5 font-semibold">{t.publish.step3.desc}</p>
               </div>
 
               {/* Multiple Upload Dropzone Area */}
@@ -1091,10 +1095,10 @@ export default function PublicarPage() {
                 >
                   <UploadCloud className="h-10 w-10 text-stone-400 group-hover:text-primary transition-colors" />
                   <div className="text-xs font-bold text-stone-750 dark:text-stone-200">
-                    Arrastrá y soltá tus imágenes reales aquí, o hacé clic para buscar
+                    {t.publish.step3.dropzoneTitle}
                   </div>
                   <div className="text-[10px] text-stone-400 dark:text-stone-500 font-bold uppercase tracking-wider">
-                    Soporta JPEG, PNG, WebP (Máx. 15 fotos)
+                    {t.publish.step3.dropzoneSub}
                   </div>
                   <input
                     type="file"
@@ -1110,7 +1114,7 @@ export default function PublicarPage() {
                 {compressing && (
                   <div className="bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-850 p-4 rounded-xl space-y-2 animate-pulse">
                     <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider text-stone-550">
-                      <span>Procesando y Comprimiendo Imágenes...</span>
+                      <span>{t.publish.step3.compressing}</span>
                       <span>{compressionProgress}%</span>
                     </div>
                     <div className="h-1.5 w-full bg-stone-200 dark:bg-stone-800 rounded-full overflow-hidden">
@@ -1126,7 +1130,7 @@ export default function PublicarPage() {
                 {formData.imageUrls && formData.imageUrls.length > 0 && (
                   <div className="space-y-3.5">
                     <h3 className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">
-                      Imágenes Cargadas ({formData.imageUrls.length} de 15)
+                      {t.publish.form.photosCount.replace('{count}', String(formData.imageUrls.length))}
                     </h3>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -1145,7 +1149,7 @@ export default function PublicarPage() {
                           {/* Portada indicator */}
                           {idx === 0 ? (
                             <span className="absolute top-2 left-2 z-10 bg-primary text-white text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded shadow">
-                              Portada
+                              {t.publish.step3.cover}
                             </span>
                           ) : (
                             <button
@@ -1153,7 +1157,7 @@ export default function PublicarPage() {
                               onClick={() => setAsCover(idx)}
                               className="absolute top-2 left-2 z-10 bg-stone-900/80 hover:bg-stone-950 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded opacity-0 group-hover/item:opacity-100 transition-opacity shadow cursor-pointer"
                             >
-                              Establecer Portada
+                              {t.publish.step3.setAsCover}
                             </button>
                           )}
 
@@ -1162,7 +1166,7 @@ export default function PublicarPage() {
                             type="button"
                             onClick={() => removeImage(idx)}
                             className="absolute top-2 right-2 z-10 p-1.5 rounded bg-stone-900/85 hover:bg-red-600 text-white shadow hover:scale-105 transition-all cursor-pointer"
-                            title="Eliminar foto"
+                            title={t.publish.step3.removePhoto}
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
@@ -1174,7 +1178,7 @@ export default function PublicarPage() {
                               disabled={idx === 0}
                               onClick={() => moveImage(idx, 'prev')}
                               className="p-1 rounded bg-stone-900/85 text-white hover:bg-stone-950 disabled:opacity-30 cursor-pointer"
-                              title="Mover izquierda"
+                              title={t.publish.step3.moveLeft}
                             >
                               <ArrowLeft className="h-3 w-3" />
                             </button>
@@ -1186,7 +1190,7 @@ export default function PublicarPage() {
                               disabled={idx === formData.imageUrls.length - 1}
                               onClick={() => moveImage(idx, 'next')}
                               className="p-1 rounded bg-stone-900/85 text-white hover:bg-stone-950 disabled:opacity-30 cursor-pointer"
-                              title="Mover derecha"
+                              title={t.publish.step3.moveRight}
                             >
                               <ArrowRight className="h-3 w-3" />
                             </button>
@@ -1201,11 +1205,12 @@ export default function PublicarPage() {
           )}
 
           {/* STEP 4: Preview & Publish */}
+          {/* STEP 4: Preview & Publish */}
           {step === 4 && (
             <div className="space-y-6 animate-fadeIn">
               <div>
-                <h2 className="font-display text-2xl font-extrabold text-stone-900 dark:text-white tracking-tight">Tu próximo espacio está listo</h2>
-                <p className="text-xs text-stone-450 dark:text-stone-500 mt-1.5 font-semibold">Repasá los detalles de tu anuncio. Una vez publicado, transmitirá tranquilidad y calidad de vida.</p>
+                <h2 className="font-display text-2xl font-extrabold text-stone-900 dark:text-white tracking-tight">{t.publish.step4.title}</h2>
+                <p className="text-xs text-stone-450 dark:text-stone-500 mt-1.5 font-semibold">{t.publish.step4.desc}</p>
               </div>
 
               {/* Minimal preview box - Editorial style */}
@@ -1222,28 +1227,28 @@ export default function PublicarPage() {
                       {formData.currency === 'CRC' ? '₡' : '$'}{formData.price.toLocaleString()}
                     </span>
                     <span className="text-[9px] font-black bg-stone-950 dark:bg-stone-100 text-white dark:text-stone-900 px-2.5 py-1 rounded uppercase tracking-wider">
-                      {formData.type === 'rent' ? 'Alquiler' : 'Venta'}
+                      {formData.type === 'rent' ? t.assistant.filters.typeRent : t.assistant.filters.typeBuy}
                     </span>
                   </div>
-                  <h3 className="font-display font-bold text-base text-stone-850 dark:text-stone-100">{formData.title || 'Propiedad sin título'}</h3>
+                  <h3 className="font-display font-bold text-base text-stone-850 dark:text-stone-100">{formData.title || t.publish.step4.untitled}</h3>
                   <p className="text-xs text-stone-450 font-bold">{formData.province}</p>
 
                   <div className="flex items-center gap-3 text-[10px] text-stone-400 dark:text-stone-500 font-bold uppercase tracking-wider border-t border-stone-150 dark:border-stone-800/40 pt-3">
                     {formData.propertyType !== 'lot' && formData.propertyType !== 'commercial' && (
                       <>
-                        <span>{formData.bedrooms} hab</span>
+                        <span>{formData.bedrooms === 1 ? t.card.specs.bedrooms.replace('{count}', String(formData.bedrooms)) : t.card.specs.bedroomsPlural.replace('{count}', String(formData.bedrooms))}</span>
                         <span>•</span>
                       </>
                     )}
                     {formData.propertyType !== 'lot' && (
                       <>
-                        <span>{formData.bathrooms} {formData.bathrooms === 1 ? 'baño' : 'baños'}</span>
+                        <span>{formData.bathrooms === 1 ? t.card.specs.bathrooms.replace('{count}', String(formData.bathrooms)) : t.card.specs.bathroomsPlural.replace('{count}', String(formData.bathrooms))}</span>
                         <span>•</span>
                       </>
                     )}
                     {formData.propertyType !== 'lot' && (
                       <>
-                        <span>{formData.parkingSpaces} parq</span>
+                        <span>{formData.parkingSpaces === 1 ? t.card.specs.parking.replace('{count}', String(formData.parkingSpaces)) : t.card.specs.parkingPlural.replace('{count}', String(formData.parkingSpaces))}</span>
                         <span>•</span>
                       </>
                     )}
@@ -1255,24 +1260,24 @@ export default function PublicarPage() {
               {/* Contact Phone Display - Premium & Read Only */}
               <div className="bg-stone-50/40 dark:bg-stone-950/40 border border-stone-200/80 dark:border-stone-800 rounded-xl p-5 space-y-3">
                 <div>
-                  <h4 className="font-display font-bold text-xs uppercase tracking-wider text-stone-700 dark:text-stone-300">Información de Contacto</h4>
-                  <p className="text-[10px] text-stone-450 dark:text-stone-500 mt-1 font-semibold">El anuncio se enlazará a tu número de teléfono registrado. Para cambiarlo, debes contactar a soporte.</p>
+                  <h4 className="font-display font-bold text-xs uppercase tracking-wider text-stone-700 dark:text-stone-300">{t.publish.step4.contactHeader}</h4>
+                  <p className="text-[10px] text-stone-450 dark:text-stone-500 mt-1 font-semibold">{t.publish.step4.contactDesc}</p>
                 </div>
 
                 <div className="flex items-center gap-3 bg-white dark:bg-stone-900 px-4 py-3 rounded-lg border border-stone-200 dark:border-stone-800">
                   <Phone className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-500" />
                   <span className="text-xs font-mono font-bold tracking-wider text-stone-850 dark:text-stone-100">
-                    {phoneVerified || formData.contactPhone || 'No registrado'}
+                    {phoneVerified || formData.contactPhone || t.publish.step4.notRegistered}
                   </span>
                   <span className="ml-auto text-[9px] font-extrabold bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-250/20 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded uppercase tracking-wider">
-                    Verificado y Enlazado
+                    {t.publish.step4.verifiedLinked}
                   </span>
                 </div>
               </div>
 
               <div className="rounded-xl border border-emerald-200 bg-emerald-50 dark:bg-emerald-950/20 p-4 text-[10px] font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-350 flex items-center gap-2.5">
                 <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
-                <span>Cuenta verificada de forma segura. El anuncio se listará de inmediato.</span>
+                <span>{t.publish.step4.verifiedAlert}</span>
               </div>
 
               <button
@@ -1281,7 +1286,7 @@ export default function PublicarPage() {
                 disabled={isSubmittingProperty}
                 className="btn-whatsapp py-4 w-full text-sm font-black flex items-center justify-center gap-2 shadow cursor-pointer disabled:opacity-50 active:scale-[0.98]"
               >
-                <span>{isSubmittingProperty ? 'Publicando...' : 'Publicar Anuncio Inmobiliario'}</span>
+                <span>{isSubmittingProperty ? t.publish.form.publishing : t.publish.form.submitPublish}</span>
               </button>
             </div>
           )}
@@ -1295,7 +1300,7 @@ export default function PublicarPage() {
                 className="btn-secondary py-2.5 px-4 text-xs flex items-center gap-1.5 cursor-pointer active:scale-[0.985] transition-all duration-200"
               >
                 <ChevronLeft className="h-4.5 w-4.5" />
-                <span>Atrás</span>
+                <span>{t.common.backBtn}</span>
               </button>
             ) : (
               <div />
@@ -1307,7 +1312,7 @@ export default function PublicarPage() {
                 onClick={nextStep}
                 className="btn-primary py-2.5 px-5 text-xs flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.985] transition-all duration-200"
               >
-                <span>Siguiente</span>
+                <span>{t.common.next}</span>
                 <ChevronRight className="h-4.5 w-4.5" />
               </button>
             ) : (

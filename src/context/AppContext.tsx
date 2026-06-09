@@ -32,6 +32,8 @@ interface AppContextType {
   phoneVerified: string | null;
   verifyPhoneInSession: (phone: string) => void;
   refreshSession: () => Promise<UserSession | null>;
+  language: 'es' | 'en';
+  setLanguage: (lang: 'es' | 'en') => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -42,6 +44,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [phoneVerified, setPhoneVerified] = useState<string | null>(null);
+  const [language, setLanguageState] = useState<'es' | 'en'>('es');
 
   // Helper to sync user favorites from server
   const syncUserFavorites = async () => {
@@ -59,6 +62,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // Load from localStorage on mount
   useEffect(() => {
+    // 0. Language
+    const savedLang = localStorage.getItem('language') as 'es' | 'en';
+    if (savedLang === 'es' || savedLang === 'en') {
+      setLanguageState(savedLang);
+    } else {
+      const match = document.cookie.match(/language=(es|en)/);
+      if (match && (match[1] === 'es' || match[1] === 'en')) {
+        setLanguageState(match[1] as 'es' | 'en');
+      }
+    }
+
     // 1. Theme (Forced dark mode always)
     setTheme('dark');
     document.documentElement.setAttribute('data-theme', 'dark');
@@ -120,6 +134,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       })
       .catch((e) => console.error('Failed to sync session on mount:', e));
   }, []);
+
+  const setLanguage = (lang: 'es' | 'en') => {
+    setLanguageState(lang);
+    localStorage.setItem('language', lang);
+    document.cookie = `language=${lang}; path=/; max-age=31536000; SameSite=Lax`;
+  };
 
   const toggleTheme = () => {
     // Light mode disabled, always dark
@@ -316,6 +336,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         phoneVerified,
         verifyPhoneInSession,
         refreshSession,
+        language,
+        setLanguage,
       }}
     >
       {children}

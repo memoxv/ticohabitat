@@ -4,7 +4,9 @@ import React, { useState } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import PropertyCard, { PropertyCardProps } from '@/components/PropertyCard';
 import { Search, SlidersHorizontal, Trash2, ArrowUpDown, ChevronDown, Check } from 'lucide-react';
-import { groupFeaturesByCategory, FEATURE_CATEGORIES, MASTER_FEATURES } from '@/lib/attributes';
+import { groupFeaturesByCategory, MASTER_FEATURES } from '@/lib/attributes';
+import { useApp } from '@/context/AppContext';
+import { getTranslations, getFeatureLabel, getCategoryLabel } from '@/lib/translations';
 
 interface PropertySearchPageProps {
   type: 'buy' | 'rent';
@@ -20,6 +22,8 @@ export default function PropertySearchPage({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { language } = useApp();
+  const t = getTranslations(language);
 
   const [showFilters, setShowFilters] = useState(false);
   const [searchText, setSearchText] = useState(searchParams.get('search') || '');
@@ -70,7 +74,8 @@ export default function PropertySearchPage({
     router.push(pathname);
   };
 
-  const typeLabel = type === 'buy' ? 'Comprar' : 'Alquilar';
+  const resultTitle = type === 'buy' ? t.search.salesTitle : t.search.rentalsTitle;
+  const resultsSubtitleText = t.search.resultsSubtitle.split('{count}');
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
@@ -79,10 +84,12 @@ export default function PropertySearchPage({
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-10 pb-6 border-b border-stone-200/80 dark:border-stone-850">
         <div>
           <h1 className="font-display text-3xl font-extrabold text-stone-900 dark:text-white tracking-tight">
-            {type === 'buy' ? 'Espacios en venta' : 'Alquileres para vivir mejor'} en <span className="text-primary">{provinceName}</span>
+            {resultTitle}{t.search.inProvince}<span className="text-primary">{provinceName}</span>
           </h1>
-          <p className="text-xs font-semibold text-stone-450 dark:text-stone-500 mt-2">
-            Encontrá tu próximo entorno entre <span className="font-bold text-stone-900 dark:text-stone-200">{initialItems.length}</span> hogares verificados.
+          <p className="text-xs font-semibold text-stone-450 dark:text-stone-550 mt-2">
+            {resultsSubtitleText[0]}
+            <span className="font-bold text-stone-900 dark:text-stone-200">{initialItems.length}</span>
+            {resultsSubtitleText[1]}
           </p>
         </div>
 
@@ -97,7 +104,7 @@ export default function PropertySearchPage({
             }`}
           >
             <SlidersHorizontal className="h-4.5 w-4.5" />
-            <span>Filtros</span>
+            <span>{t.search.filtersBtn}</span>
             {activeFilterCount > 0 && (
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-black text-white ring-2 ring-white dark:ring-stone-950">
                 {activeFilterCount}
@@ -111,10 +118,10 @@ export default function PropertySearchPage({
               onChange={(e) => updateUrl({ sort: e.target.value })}
               className="w-full bg-card-bg text-stone-750 dark:text-stone-200 text-xs font-bold rounded-lg border border-card-border px-4 py-3 pr-9 appearance-none focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 cursor-pointer shadow-sm"
             >
-              <option value="recent">Más recientes</option>
-              <option value="price_asc">Menor precio</option>
-              <option value="price_desc">Mayor precio</option>
-              <option value="relevant">Más relevantes</option>
+              <option value="recent">{t.search.sortRecent}</option>
+              <option value="price_asc">{t.search.sortPriceAsc}</option>
+              <option value="price_desc">{t.search.sortPriceDesc}</option>
+              <option value="relevant">{t.search.sortRelevant}</option>
             </select>
             <ArrowUpDown className="absolute right-3.5 top-3.5 h-4 w-4 text-stone-400 pointer-events-none" />
           </div>
@@ -140,22 +147,22 @@ export default function PropertySearchPage({
               <button 
                 type="button" 
                 onClick={() => setShowFilters(false)}
-                className="text-[10px] font-black uppercase tracking-wider text-stone-400 dark:text-stone-500 cursor-pointer p-1"
+                className="text-[10px] font-black uppercase tracking-wider text-stone-400 dark:text-stone-550 cursor-pointer p-1"
               >
-                Cerrar
+                {t.navbar.mobileMenuClose}
               </button>
             </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             
             {/* Search Input */}
             <form onSubmit={handleSearchSubmit} className="sm:col-span-2">
-              <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">
-                Buscar por palabra clave {searchText && <span className="text-primary font-black">(Filtro Activo)</span>}
+              <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-550 uppercase tracking-wider mb-2">
+                {t.search.searchLabel} {searchText && <span className="text-primary font-black">{t.search.activeFilter}</span>}
               </label>
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Ej: condominio, piscina, amueblado, jardín..."
+                  placeholder={t.search.searchPlaceholder}
                   value={searchText}
                   onChange={(e) => setSearchText(e.target.value)}
                   className={`input-premium py-3 pl-10 pr-20 ${searchText ? 'border-primary/50 bg-primary-light/10 dark:bg-primary-light/5' : ''}`}
@@ -165,38 +172,38 @@ export default function PropertySearchPage({
                   type="submit" 
                   className="btn-primary absolute right-1.5 top-1.5 py-1.5 px-3 text-[10px] shadow-sm"
                 >
-                  Buscar
+                  {t.search.searchBtn}
                 </button>
               </div>
             </form>
 
             {/* Property Type */}
             <div>
-              <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">
-                Tipo de Propiedad {currentPropertyType !== 'all' && <span className="text-primary font-black">(Activo)</span>}
+              <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-550 uppercase tracking-wider mb-2">
+                {t.search.propertyTypeLabel} {currentPropertyType !== 'all' && <span className="text-primary font-black">{t.search.activeFilter}</span>}
               </label>
               <select
                 value={currentPropertyType}
                 onChange={(e) => updateUrl({ propertyType: e.target.value })}
                 className={`input-premium py-3 cursor-pointer ${currentPropertyType !== 'all' ? 'border-primary/50 bg-primary-light/10 dark:bg-primary-light/5' : ''}`}
               >
-                <option value="all">Todos los tipos</option>
-                <option value="house">Casas</option>
-                <option value="apartment">Apartamentos</option>
-                <option value="lot">Lotes/Terrenos</option>
-                <option value="commercial">Locales Comerciales</option>
-                <option value="other">Otros</option>
+                <option value="all">{t.search.allTypes}</option>
+                <option value="house">{language === 'en' ? 'Houses' : 'Casas'}</option>
+                <option value="apartment">{language === 'en' ? 'Apartments' : 'Apartamentos'}</option>
+                <option value="lot">{language === 'en' ? 'Lots/Lands' : 'Lotes/Terrenos'}</option>
+                <option value="commercial">{language === 'en' ? 'Commercial Spaces' : 'Locales Comerciales'}</option>
+                <option value="other">{language === 'en' ? 'Others' : 'Otros'}</option>
               </select>
             </div>
 
             {/* Price Max */}
             <div>
-              <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">
-                Precio Máximo ({type === 'rent' ? '₡/mes' : 'USD'}) {currentPriceMax && <span className="text-primary font-black">(Activo)</span>}
+              <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-550 uppercase tracking-wider mb-2">
+                {t.search.priceMaxLabel} ({type === 'rent' ? (language === 'en' ? 'CRC/month' : '₡/mes') : 'USD'}) {currentPriceMax && <span className="text-primary font-black">{t.search.activeFilter}</span>}
               </label>
               <input
                 type="number"
-                placeholder="Cualquier precio"
+                placeholder={t.search.anyPrice}
                 value={currentPriceMax}
                 onChange={(e) => updateUrl({ priceMax: e.target.value })}
                 className={`input-premium py-3 ${currentPriceMax ? 'border-primary/50 bg-primary-light/10' : ''}`}
@@ -205,15 +212,15 @@ export default function PropertySearchPage({
 
             {/* Bedrooms */}
             <div>
-              <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">
-                Habitaciones {currentBedrooms !== '0' && <span className="text-primary font-black">(Activo)</span>}
+              <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-555 uppercase tracking-wider mb-2">
+                {t.search.bedroomsLabel} {currentBedrooms !== '0' && <span className="text-primary font-black">{t.search.activeFilter}</span>}
               </label>
               <select
                 value={currentBedrooms}
                 onChange={(e) => updateUrl({ bedrooms: e.target.value })}
                 className={`input-premium py-3 cursor-pointer ${currentBedrooms !== '0' ? 'border-primary/50 bg-primary-light/10' : ''}`}
               >
-                <option value="0">Cualquiera</option>
+                <option value="0">{t.search.any}</option>
                 <option value="1">1+</option>
                 <option value="2">2+</option>
                 <option value="3">3+</option>
@@ -223,15 +230,15 @@ export default function PropertySearchPage({
 
             {/* Bathrooms */}
             <div>
-              <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">
-                Baños {currentBathrooms !== '0' && <span className="text-primary font-black">(Activo)</span>}
+              <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-555 uppercase tracking-wider mb-2">
+                {t.search.bathroomsLabel} {currentBathrooms !== '0' && <span className="text-primary font-black">{t.search.activeFilter}</span>}
               </label>
               <select
                 value={currentBathrooms}
                 onChange={(e) => updateUrl({ bathrooms: e.target.value })}
                 className={`input-premium py-3 cursor-pointer ${currentBathrooms !== '0' ? 'border-primary/50 bg-primary-light/10' : ''}`}
               >
-                <option value="0">Cualquiera</option>
+                <option value="0">{t.search.any}</option>
                 <option value="1">1+</option>
                 <option value="2">2+</option>
                 <option value="3">3+</option>
@@ -240,15 +247,15 @@ export default function PropertySearchPage({
 
             {/* Parking */}
             <div>
-              <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-2">
-                Parqueos {currentParking !== '0' && <span className="text-primary font-black">(Activo)</span>}
+              <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-555 uppercase tracking-wider mb-2">
+                {t.search.parkingLabel} {currentParking !== '0' && <span className="text-primary font-black">{t.search.activeFilter}</span>}
               </label>
               <select
                 value={currentParking}
                 onChange={(e) => updateUrl({ parking: e.target.value })}
                 className={`input-premium py-3 cursor-pointer ${currentParking !== '0' ? 'border-primary/50 bg-primary-light/10' : ''}`}
               >
-                <option value="0">Cualquiera</option>
+                <option value="0">{t.search.any}</option>
                 <option value="1">1+</option>
                 <option value="2">2+</option>
                 <option value="3">3+</option>
@@ -259,8 +266,8 @@ export default function PropertySearchPage({
           {/* Dynamic Contextual Attributes Section */}
           <div className="col-span-1 sm:col-span-2 md:col-span-4 border-t border-stone-150 dark:border-stone-800/80 pt-5 mt-2 space-y-5">
             <div>
-              <h4 className="font-display font-bold text-xs text-stone-800 dark:text-stone-150 tracking-tight">Filtros Avanzados Especiales</h4>
-              <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-0.5">Filtre por comodidades o características lógicas específicas de esta categoría.</p>
+              <h4 className="font-display font-bold text-xs text-stone-800 dark:text-stone-150 tracking-tight">{t.search.advancedFilters}</h4>
+              <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-0.5">{t.search.advancedFiltersDesc}</p>
             </div>
 
             <div className="space-y-4">
@@ -270,10 +277,12 @@ export default function PropertySearchPage({
                 
                 if (visibleFeatures.length === 0) return null;
 
+                const categoryLabelText = getCategoryLabel(categoryKey, language);
+
                 return (
                   <div key={categoryKey} className="space-y-1.5 animate-fadeIn">
-                    <span className="text-[8px] font-black uppercase tracking-wider text-stone-400 dark:text-stone-500 block">
-                      {FEATURE_CATEGORIES[categoryKey]}
+                    <span className="text-[8px] font-black uppercase tracking-wider text-stone-400 dark:text-stone-550 block">
+                      {categoryLabelText}
                     </span>
                     
                     <div className="flex flex-wrap gap-1.5">
@@ -287,6 +296,8 @@ export default function PropertySearchPage({
                           updateUrl({ features: nextFeatures.length > 0 ? nextFeatures.join(',') : null });
                         };
 
+                        const featureLabelText = getFeatureLabel(feat.key, feat.label, language);
+
                         return (
                           <button
                             key={feat.key}
@@ -299,7 +310,7 @@ export default function PropertySearchPage({
                             }`}
                           >
                             {isChecked && <Check className="h-3 w-3 shrink-0" />}
-                            <span>{feat.label}</span>
+                            <span>{featureLabelText}</span>
                           </button>
                         );
                       })}
@@ -317,7 +328,7 @@ export default function PropertySearchPage({
                   onClick={() => setShowAllFeatures(!showAllFeatures)}
                   className="btn-secondary py-1.5 px-3 text-[10px] inline-flex items-center gap-1 cursor-pointer"
                 >
-                  <span>{showAllFeatures ? 'Ocultar filtros avanzados' : 'Ver más filtros avanzados'}</span>
+                  <span>{showAllFeatures ? t.search.showLessFilters : t.search.showMoreFilters}</span>
                   <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showAllFeatures ? 'rotate-180' : ''}`} />
                 </button>
               </div>
@@ -331,7 +342,7 @@ export default function PropertySearchPage({
               className="btn-danger py-2 px-4 text-xs inline-flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Trash2 className="h-4 w-4" />
-              <span>Limpiar filtros</span>
+              <span>{t.search.clearFilters}</span>
             </button>
           </div>
           </div>
@@ -344,14 +355,14 @@ export default function PropertySearchPage({
           
           {/* Left Column - Editorial statement and action */}
           <div className="md:col-span-3 flex flex-col justify-center space-y-6 text-left pr-0 md:pr-6">
-            <span className="text-[9px] font-black uppercase tracking-widest text-stone-400 dark:text-stone-500">
-              Búsqueda de espacios
+            <span className="text-[9px] font-black uppercase tracking-widest text-stone-400 dark:text-stone-550">
+              {language === 'en' ? 'Property Search' : 'Búsqueda de espacios'}
             </span>
             <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-stone-950 dark:text-white leading-tight">
-              Sin coincidencias en este rincón
+              {t.search.emptyTitle}
             </h2>
             <p className="text-xs text-stone-555 dark:text-stone-400 leading-relaxed font-semibold max-w-lg">
-              Los filtros seleccionados son muy específicos. Para descubrir hogares auténticos y terrenos con potencial en Costa Rica, te sugerimos simplificar tus criterios o explorar nuestras zonas más buscadas.
+              {t.search.emptyDesc}
             </p>
             
             <div className="pt-2">
@@ -360,7 +371,7 @@ export default function PropertySearchPage({
                 className="btn-primary py-3 px-6 text-xs inline-flex items-center gap-2 cursor-pointer shadow active:scale-[0.985] transition-all duration-200"
               >
                 <Trash2 className="h-4 w-4" />
-                <span>Restablecer Criterios de Búsqueda</span>
+                <span>{t.search.emptyResetBtn}</span>
               </button>
             </div>
           </div>
@@ -369,10 +380,10 @@ export default function PropertySearchPage({
           <div className="md:col-span-2 border-t md:border-t-0 md:border-l border-stone-150 dark:border-stone-800/80 pt-8 md:pt-0 md:pl-10 flex flex-col justify-center space-y-6">
             <div className="space-y-1.5">
               <h3 className="font-display font-bold text-sm text-stone-850 dark:text-stone-150 tracking-tight">
-                ¿Dónde te gustaría comenzar?
+                {t.search.inspirationTitle}
               </h3>
               <p className="text-[10px] text-stone-450 dark:text-stone-500">
-                Hacé clic en alguna de nuestras provincias más cotizadas:
+                {t.search.inspirationDesc}
               </p>
             </div>
 
@@ -393,17 +404,17 @@ export default function PropertySearchPage({
                   className="flex items-center justify-between p-3 rounded-xl border border-stone-200 dark:border-stone-800 hover:border-stone-400 dark:hover:border-stone-600 bg-stone-50/50 dark:bg-stone-950/40 text-[11px] font-bold text-stone-750 dark:text-stone-300 transition-all active:scale-[0.97] cursor-pointer hover:bg-stone-50 dark:hover:bg-stone-900"
                 >
                   <span>{loc.name}</span>
-                  <span className="text-[9px] text-stone-400 uppercase tracking-widest font-black">Explorar</span>
+                  <span className="text-[9px] text-stone-400 uppercase tracking-widest font-black">{language === 'en' ? 'Explore' : 'Explorar'}</span>
                 </button>
               ))}
             </div>
 
-            {/* Testimonial/Brand block */}
+            {/* Curated quote block */}
             <div className="p-4 rounded-xl bg-stone-50/60 dark:bg-stone-950/20 border border-stone-150 dark:border-stone-800/60">
               <p className="italic text-[10px] text-stone-500 dark:text-stone-400 leading-normal">
-                "Nuestra misión es conectar personas con espacios de tranquilidad y paz en Costa Rica, respetando la arquitectura autóctona y el entorno natural."
+                {t.search.missionQuote}
               </p>
-              <span className="block text-[8px] font-black uppercase tracking-wider text-stone-400 dark:text-stone-500 mt-2">
+              <span className="block text-[8px] font-black uppercase tracking-wider text-stone-400 dark:text-stone-550 mt-2">
                 — TicoHabitat
               </span>
             </div>

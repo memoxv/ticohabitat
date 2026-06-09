@@ -9,16 +9,14 @@ import {
   X, 
   MessageSquare, 
   MapPin, 
-  Home, 
-  DollarSign, 
-  UserCheck, 
   ChevronRight, 
   Loader2,
-  Trash2,
   HelpCircle
 } from 'lucide-react';
 import { searchWithAssistantAction, AssistantSearchResult } from '@/app/actions/assistant';
 import { ParsedFilters } from '@/lib/assistantParser';
+import { useApp } from '@/context/AppContext';
+import { getTranslations } from '@/lib/translations';
 
 interface Message {
   id: string;
@@ -31,15 +29,11 @@ interface Message {
   fallbackProperties?: any[];
 }
 
-const SUGGESTIONS = [
-  'Casa en alquiler en Poás por ₡200.000',
-  'Lote en Cartago menor a ₡30 millones',
-  'Apartamento que acepte mascotas en Escazú',
-  'Quiero una casa con 3 habitaciones en Heredia'
-];
-
 export default function SearchAssistantBubble() {
   const router = useRouter();
+  const { language } = useApp();
+  const t = getTranslations(language);
+
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -56,17 +50,17 @@ export default function SearchAssistantBubble() {
     }
   }, [messages, isLoading]);
 
-  // Welcome message on mount
+  // Welcome message on mount/lang change
   useEffect(() => {
     setMessages([
       {
         id: 'welcome',
         sender: 'assistant',
-        text: '¡Hola! 👋 Soy su asistente inteligente de TicoHabitat.\n\nCuénteme, ¿qué tipo de propiedad anda buscando y en qué zona de Costa Rica?',
+        text: t.assistant.welcomeMessage,
         timestamp: new Date()
       }
     ]);
-  }, []);
+  }, [language]);
 
   const handleSearch = async (textSearch: string, filterOverride?: ParsedFilters) => {
     if (!textSearch.trim() && !filterOverride) return;
@@ -96,9 +90,9 @@ export default function SearchAssistantBubble() {
         
         let responseText = '';
         if (result.isFallback) {
-          responseText = 'No encontré exactamente lo que busca en esa ubicación o rango de precio, pero encontré excelentes opciones similares que podrían gustarle:';
+          responseText = t.assistant.fallbackMessage;
         } else {
-          responseText = `¡Excelente! Encontré ${result.matchedCount} propiedades que coinciden con su búsqueda:`;
+          responseText = t.assistant.successMessage.replace('{count}', String(result.matchedCount));
         }
 
         setMessages(prev => [
@@ -120,7 +114,7 @@ export default function SearchAssistantBubble() {
           {
             id: Math.random().toString(),
             sender: 'assistant',
-            text: 'Perdón, no pude procesar esa consulta. ¿Podría intentar escribirlo de otra forma?',
+            text: t.assistant.noResults,
             timestamp: new Date()
           }
         ]);
@@ -132,7 +126,7 @@ export default function SearchAssistantBubble() {
         {
           id: Math.random().toString(),
           sender: 'assistant',
-          text: 'Hubo un error de conexión con nuestro servidor. Por favor intente de nuevo.',
+          text: t.assistant.connectionError,
           timestamp: new Date()
         }
       ]);
@@ -159,7 +153,7 @@ export default function SearchAssistantBubble() {
         {
           id: Math.random().toString(),
           sender: 'assistant',
-          text: 'Filtros limpiados. ¿Qué otra propiedad busca?',
+          text: t.assistant.clearedFilters,
           timestamp: new Date()
         }
       ]);
@@ -174,7 +168,7 @@ export default function SearchAssistantBubble() {
       {
         id: Math.random().toString(),
         sender: 'user',
-        text: `Eliminé el filtro de ${getFilterLabel(key, activeFilters[key])}`,
+        text: t.assistant.removedFilter.replace('{label}', getFilterLabel(key, activeFilters[key])),
         timestamp: new Date()
       }
     ]);
@@ -185,28 +179,21 @@ export default function SearchAssistantBubble() {
 
   const getFilterLabel = (key: keyof ParsedFilters, value: any): string => {
     switch (key) {
-      case 'type': return value === 'rent' ? 'Alquiler' : 'Compra';
+      case 'type': return value === 'rent' ? t.assistant.filters.typeRent : t.assistant.filters.typeBuy;
       case 'province': return `📍 ${value}`;
       case 'canton': return `📍 ${value}`;
       case 'district': return `📍 ${value}`;
       case 'propertyType': {
-        const types: Record<string, string> = {
-          house: 'Casa',
-          apartment: 'Apartamento',
-          lot: 'Lote',
-          quinta: 'Quinta',
-          commercial: 'Comercial',
-          beach: 'Playa'
-        };
+        const types: Record<string, string> = t.card.propertyTypes;
         return `🏠 ${types[value] || value}`;
       }
-      case 'priceMax': return `💰 Max: ${formatCurrency(value, activeFilters?.currency)}`;
-      case 'priceMin': return `💰 Min: ${formatCurrency(value, activeFilters?.currency)}`;
-      case 'bedrooms': return `🛏️ ${value} Hab`;
-      case 'bathrooms': return `🚿 ${value} Baños`;
-      case 'petsAllowed': return '🐾 Mascotas';
-      case 'condominium': return '🛡️ Condo';
-      case 'furnished': return '🛋️ Amueblado';
+      case 'priceMax': return t.assistant.filters.maxPrice.replace('{price}', formatCurrency(value, activeFilters?.currency));
+      case 'priceMin': return t.assistant.filters.minPrice.replace('{price}', formatCurrency(value, activeFilters?.currency));
+      case 'bedrooms': return t.assistant.filters.bedrooms.replace('{count}', String(value));
+      case 'bathrooms': return t.assistant.filters.bathrooms.replace('{count}', String(value));
+      case 'petsAllowed': return t.assistant.filters.pets;
+      case 'condominium': return t.assistant.filters.condo;
+      case 'furnished': return t.assistant.filters.furnished;
       default: return String(value);
     }
   };
@@ -284,6 +271,8 @@ export default function SearchAssistantBubble() {
     return `/${typePath}/${provinceSlug}${queryStr}`;
   };
 
+  const assistantSuggestions = t.assistant.suggestions || [];
+
   return (
     <div className="font-sans">
       {/* 1. Closed State: Glowing Forest Bubble */}
@@ -291,7 +280,7 @@ export default function SearchAssistantBubble() {
         <button
           onClick={() => setIsOpen(true)}
           className="fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-stone-900/90 hover:bg-stone-950 text-white shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer group border border-stone-800 backdrop-blur-md"
-          title="Asistente de Búsqueda Inteligente"
+          title={t.assistant.title}
         >
           <div className="absolute inset-0 bg-gradient-to-tr from-emerald-950/20 to-emerald-400/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-full" />
           <MessageSquare className="h-5 w-5 text-emerald-450 relative z-10 transition-transform duration-300 group-hover:rotate-12" />
@@ -317,8 +306,8 @@ export default function SearchAssistantBubble() {
                 <Sparkles className="h-4.5 w-4.5 text-amber-350 fill-amber-350/20" />
               </div>
               <div>
-                <h3 className="font-display font-black text-sm tracking-wide">Buscador Inteligente</h3>
-                <p className="text-[10px] font-bold text-emerald-250/90 uppercase tracking-widest mt-0.5">Costa Rica • Beta</p>
+                <h3 className="font-display font-black text-sm tracking-wide">{t.assistant.title}</h3>
+                <p className="text-[10px] font-bold text-emerald-250/90 uppercase tracking-widest mt-0.5">{t.assistant.betaBadge}</p>
               </div>
             </div>
 
@@ -381,7 +370,7 @@ export default function SearchAssistantBubble() {
                         key={prop.id}
                         href={`/propiedad/${prop.slug}`}
                         target="_blank"
-                        className="group flex gap-3 p-2.5 rounded-xl border border-card-border bg-card-bg hover:border-emerald-700/40 dark:hover:border-emerald-700/30 transition-all shadow-xs"
+                        className="group flex gap-3 p-2.5 rounded-xl border border-card-border bg-card-bg hover-border-emerald-700/40 dark:hover:border-emerald-700/30 transition-all shadow-xs"
                       >
                         {/* Thumb */}
                         <div className="h-16 w-20 rounded-lg overflow-hidden bg-stone-100 relative shrink-0">
@@ -393,12 +382,12 @@ export default function SearchAssistantBubble() {
                             />
                           ) : (
                             <div className="h-full w-full flex items-center justify-center text-[10px] font-bold text-stone-400">
-                              Sin Foto
+                              {t.assistant.noPhoto}
                             </div>
                           )}
                           {prop.featured && (
                             <span className="absolute top-1 left-1 bg-amber-500 text-[8px] font-black text-stone-950 uppercase px-1 rounded-sm shadow-sm">
-                              Destacado
+                              {t.card.featuredBadge}
                             </span>
                           )}
                         </div>
@@ -422,7 +411,7 @@ export default function SearchAssistantBubble() {
                               {prop.type === 'rent' ? '/mes' : ''}
                             </span>
                             <span className="text-[8px] font-bold text-stone-450 uppercase flex items-center gap-0.5">
-                              <span>Ver ficha</span>
+                              <span>{t.assistant.viewDetails}</span>
                               <ChevronRight className="h-3 w-3" />
                             </span>
                           </div>
@@ -437,7 +426,7 @@ export default function SearchAssistantBubble() {
                         onClick={() => setIsOpen(false)}
                         className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 hover:bg-emerald-100 dark:hover:bg-emerald-950/40 text-emerald-850 dark:text-emerald-400 text-[10px] font-black uppercase tracking-wider py-2.5 transition-colors border border-emerald-150 dark:border-emerald-900/30 shadow-xs"
                       >
-                        <span>Abrir resultados en el buscador general</span>
+                        <span>{t.assistant.openGeneralSearch}</span>
                         <ChevronRight className="h-3.5 w-3.5" />
                       </Link>
                     </div>
@@ -455,7 +444,7 @@ export default function SearchAssistantBubble() {
               <div className="flex flex-col items-start animate-fadeIn">
                 <div className="bg-card-bg rounded-2xl rounded-tl-sm px-4 py-3 border border-card-border/60 shadow-xs flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin text-emerald-800 dark:text-emerald-450" />
-                  <span className="text-xs font-medium text-stone-500">Buscando en TicoHabitat...</span>
+                  <span className="text-xs font-medium text-stone-500">{t.assistant.assistantSearchStatus}</span>
                 </div>
               </div>
             )}
@@ -465,10 +454,10 @@ export default function SearchAssistantBubble() {
               <div className="pt-2 animate-fadeIn space-y-2">
                 <p className="text-[10px] font-black text-stone-400 dark:text-stone-500 uppercase tracking-widest flex items-center gap-1">
                   <HelpCircle className="h-3.5 w-3.5 text-emerald-700" />
-                  <span>Sugerencias de búsqueda</span>
+                  <span>{t.assistant.suggestionsTitle}</span>
                 </p>
                 <div className="flex flex-col gap-2">
-                  {SUGGESTIONS.map((sug, idx) => (
+                  {assistantSuggestions.map((sug, idx) => (
                     <button
                       key={idx}
                       onClick={() => handleSuggestionClick(sug)}
@@ -495,7 +484,7 @@ export default function SearchAssistantBubble() {
             >
               <input
                 type="text"
-                placeholder="Ej: Casa en alquiler en Escazú..."
+                placeholder={t.assistant.placeholder}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 disabled={isLoading}
