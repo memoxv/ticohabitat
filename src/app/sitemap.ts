@@ -4,7 +4,7 @@ import { db } from '@/lib/db';
 export const revalidate = 3600; // Cache sitemap for 1 hour
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://ticohabitat.com';
+  const baseUrl = 'https://www.ticohabitat.com';
 
   // 1. Static and provincial landing pages
   const staticPages = [

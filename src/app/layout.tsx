@@ -10,7 +10,7 @@ import { Analytics } from '@vercel/analytics/next';
 export const metadata: Metadata = {
   title: 'TicoHabitat | Propiedades en Costa Rica (Alquiler y Venta)',
   description: 'La plataforma inmobiliaria más rápida y confiable de Costa Rica. Encuentra y publica casas, apartamentos y lotes sin spam ni duplicados.',
-  metadataBase: new URL('https://ticohabitat.com'),
+  metadataBase: new URL('https://www.ticohabitat.com'),
   manifest: '/manifest.json',
   alternates: {
     canonical: '/',
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'TicoHabitat | Bienes Raíces en Costa Rica',
     description: 'Encuentra alquileres y ventas de propiedades en San José, Alajuela, Heredia y más. Verificación obligatoria por OTP para anunciantes.',
-    url: 'https://ticohabitat.com',
+    url: 'https://www.ticohabitat.com',
     siteName: 'TicoHabitat',
     locale: 'es_CR',
     type: 'website',

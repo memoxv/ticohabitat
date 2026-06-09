@@ -163,7 +163,7 @@ export const translations = {
       verifiedAd: 'Anuncio verificado',
       callDirectly: 'Llamar directamente',
       contactWhatsapp: 'Contactar por WhatsApp',
-      whatsappMessageTemplate: '👋 *¡Hola!*\n\nVi tu anuncio en *TicoHabitat* 🏡\n👉 *{propertyType}:* {title}\n💰 *Precio:* {price}\n📍 *Ubicación:* {location}\n\n¿Sigue disponible para coordinar una visita?\n\n🔗 *Enlace:* https://ticohabitat.com/propiedad/{slug}',
+      whatsappMessageTemplate: '👋 *¡Hola!*\n\nVi tu anuncio en *TicoHabitat* 🏡\n👉 *{propertyType}:* {title}\n💰 *Precio:* {price}\n📍 *Ubicación:* {location}\n\n¿Sigue disponible para coordinar una visita?\n\n🔗 *Enlace:* https://www.ticohabitat.com/propiedad/{slug}',
       propertyTypes: {
         house: 'Casa',
         apartment: 'Apartamento',
@@ -687,7 +687,7 @@ export const translations = {
       verifiedAd: 'Verified listing',
       callDirectly: 'Call directly',
       contactWhatsapp: 'Contact via WhatsApp',
-      whatsappMessageTemplate: '👋 *Hello!*\n\nI saw your listing on *TicoHabitat* 🏡\n👉 *{propertyType}:* {title}\n💰 *Price:* {price}\n📍 *Location:* {location}\n\nIs it still available to coordinate a visit?\n\n🔗 *Link:* https://ticohabitat.com/propiedad/{slug}',
+      whatsappMessageTemplate: '👋 *Hello!*\n\nI saw your listing on *TicoHabitat* 🏡\n👉 *{propertyType}:* {title}\n💰 *Price:* {price}\n📍 *Location:* {location}\n\nIs it still available to coordinate a visit?\n\n🔗 *Link:* https://www.ticohabitat.com/propiedad/{slug}',
       propertyTypes: {
         house: 'House',
         apartment: 'Apartment',

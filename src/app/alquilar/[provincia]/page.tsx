@@ -35,7 +35,7 @@ interface PageProps {
 export async function generateMetadata({ params }: { params: Promise<{ provincia: string }> }) {
   const resolvedParams = await params;
   const province = PROVINCE_MAP[resolvedParams.provincia] || 'Costa Rica';
-  const url = `https://ticohabitat.com/alquilar/${resolvedParams.provincia}`;
+  const url = `https://www.ticohabitat.com/alquilar/${resolvedParams.provincia}`;
 
   return {
     title: `Propiedades en Alquiler en ${province} | TicoHabitat`,

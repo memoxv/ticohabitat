@@ -15,5 +15,5 @@ export async function getAbsoluteAppUrl(): Promise<string> {
   } catch (error) {
     // Fail-safe fallback in static contexts or edge cases
   }
-  return process.env.NEXT_PUBLIC_APP_URL || 'https://ticohabitat.com';
+  return process.env.NEXT_PUBLIC_APP_URL || 'https://www.ticohabitat.com';
 }

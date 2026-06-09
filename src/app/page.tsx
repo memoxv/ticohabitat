@@ -59,8 +59,8 @@ export default async function Home() {
     '@graph': [
       {
         '@type': 'WebSite',
-        '@id': 'https://ticohabitat.com/#website',
-        'url': 'https://ticohabitat.com',
+        '@id': 'https://www.ticohabitat.com/#website',
+        'url': 'https://www.ticohabitat.com',
         'name': 'TicoHabitat',
         'description': lang === 'en' 
           ? 'Costa Rica\'s fastest and most reliable real estate platform. Find and publish houses, apartments and lots with no spam or duplicates.'
@@ -69,7 +69,7 @@ export default async function Home() {
           '@type': 'SearchAction',
           'target': {
             '@type': 'EntryPoint',
-            'urlTemplate': 'https://ticohabitat.com/comprar?search={search_term_string}'
+            'urlTemplate': 'https://www.ticohabitat.com/comprar?search={search_term_string}'
           },
           'query-input': 'required name=search_term_string'
         },
@@ -77,12 +77,12 @@ export default async function Home() {
       },
       {
         '@type': 'Organization',
-        '@id': 'https://ticohabitat.com/#organization',
+        '@id': 'https://www.ticohabitat.com/#organization',
         'name': 'TicoHabitat',
-        'url': 'https://ticohabitat.com',
+        'url': 'https://www.ticohabitat.com',
         'logo': {
           '@type': 'ImageObject',
-          'url': 'https://ticohabitat.com/logo-vertical.png',
+          'url': 'https://www.ticohabitat.com/logo-vertical.png',
           'width': '512',
           'height': '512'
         },

@@ -65,8 +65,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     .trim();
   const seoDescription = `${propertyTypeName} en ${actionText} en ${locationText}. ${cleanDescription}...`;
 
-  const imageUrl = property.images?.[0]?.url || 'https://ticohabitat.com/default-brand-cover.jpg';
-  const url = `https://ticohabitat.com/propiedad/${resolvedParams.slug}`;
+  const imageUrl = property.images?.[0]?.url || 'https://www.ticohabitat.com/default-brand-cover.jpg';
+  const url = `https://www.ticohabitat.com/propiedad/${resolvedParams.slug}`;
 
   return {
     title: seoTitle,
@@ -175,7 +175,7 @@ export default async function PropertyDetailsPage({ params }: { params: Promise<
     '@type': schemaType,
     name: property.title,
     description: property.description.substring(0, 160) + '...',
-    url: `https://ticohabitat.com/propiedad/${property.slug}`,
+    url: `https://www.ticohabitat.com/propiedad/${property.slug}`,
     image: property.images.map((img: any) => img.url),
     address: {
       '@type': 'PostalAddress',
@@ -196,7 +196,7 @@ export default async function PropertyDetailsPage({ params }: { params: Promise<
       price: property.price,
       priceCurrency: property.currency,
       priceValidUntil: '2027-12-31',
-      url: `https://ticohabitat.com/propiedad/${property.slug}`,
+      url: `https://www.ticohabitat.com/propiedad/${property.slug}`,
       availability: 'https://schema.org/InStock',
       validFrom: property.createdAt.toISOString().split('T')[0],
     },

@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Comprar Propiedades en Costa Rica | TicoHabitat',
     description: 'Encuentre casas, apartamentos, lotes y quintas en venta en Costa Rica. Trato directo con el propietario, verificación OTP celular y libre de intermediarios.',
-    url: 'https://ticohabitat.com/comprar',
+    url: 'https://www.ticohabitat.com/comprar',
     siteName: 'TicoHabitat',
     locale: 'es_CR',
     type: 'website',
@@ -66,7 +66,7 @@ export default async function ComprarIndex() {
     'description': lang === 'en'
       ? 'Find houses, apartments, lots and country estates for sale in Costa Rica. Direct deal with owner, free of commissions.'
       : 'Encuentre casas, apartamentos, lotes y quintas en venta en Costa Rica. Trato directo con el propietario sin intermediarios.',
-    'url': 'https://ticohabitat.com/comprar',
+    'url': 'https://www.ticohabitat.com/comprar',
     'about': {
       '@type': 'Place',
       'name': 'Costa Rica'

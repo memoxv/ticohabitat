@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Alquiler de Propiedades en Costa Rica | TicoHabitat',
     description: 'Descubra casas, apartamentos, cuartos y locales en alquiler en Costa Rica. Trato directo, verificación OTP contra spam y entorno 100% confiable.',
-    url: 'https://ticohabitat.com/alquilar',
+    url: 'https://www.ticohabitat.com/alquilar',
     siteName: 'TicoHabitat',
     locale: 'es_CR',
     type: 'website',
@@ -66,7 +66,7 @@ export default async function AlquilarIndex() {
     'description': lang === 'en'
       ? 'Find houses, apartments, spaces and commercial properties for rent in Costa Rica. Direct contact, no commissions.'
       : 'Descubra casas, apartamentos, cuartos y locales en alquiler en Costa Rica. Trato directo con el propietario sin intermediarios.',
-    'url': 'https://ticohabitat.com/alquilar',
+    'url': 'https://www.ticohabitat.com/alquilar',
     'about': {
       '@type': 'Place',
       'name': 'Costa Rica'
