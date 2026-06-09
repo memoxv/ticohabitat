@@ -1,5 +1,3 @@
-'use client'; // Will be stripped or ignored in server context because we don't use React hooks here
-
 export type Language = 'es' | 'en';
 
 export const translations = {
