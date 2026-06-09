@@ -271,7 +271,7 @@ export default function Navbar() {
       
       {/* Premium Full-Screen Loading Overlay to block interaction & show loader */}
       {isPending && (
-        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-stone-900/60 dark:bg-stone-950/70 backdrop-blur-[3px] animate-fadeIn transition-all duration-300">
+        <div className="fixed inset-0 w-screen h-screen z-[9999] flex flex-col items-center justify-center bg-stone-900/60 dark:bg-stone-950/75 backdrop-blur-[3px] pointer-events-auto select-none transition-all duration-300">
           <div className="flex flex-col items-center gap-4.5 p-7 rounded-2xl bg-white dark:bg-stone-900 border border-stone-250/20 dark:border-stone-800/60 shadow-xl max-w-xs w-[85%] text-center animate-scaleIn">
             <div className="relative flex items-center justify-center">
               {/* Spinner animation */}
