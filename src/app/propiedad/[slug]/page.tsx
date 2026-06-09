@@ -5,6 +5,7 @@ import PropertyCard from '@/components/PropertyCard';
 import PropertyDetailsClient from '@/components/PropertyDetailsClient';
 import PropertyGallery from '@/components/PropertyGallery';
 import { resolveFeatures, FEATURE_CATEGORIES } from '@/lib/attributes';
+import TranslatedText from '@/components/TranslatedText';
 import {
   BedDouble,
   Bath,
@@ -293,7 +294,7 @@ export default async function PropertyDetailsPage({ params }: { params: Promise<
               </div>
 
               <h1 className="font-display text-3xl sm:text-4xl font-extrabold text-stone-900 dark:text-white leading-tight tracking-tight">
-                {property.title}
+                <TranslatedText text={property.title} />
               </h1>
 
               <p className="text-sm font-bold text-stone-450 flex items-center gap-1">
@@ -322,9 +323,11 @@ export default async function PropertyDetailsPage({ params }: { params: Promise<
 
             {/* Description */}
             <div className="space-y-4 pt-4">
-              <h2 className="font-display text-xl font-bold text-stone-900 dark:text-white tracking-tight">Descripción de la Propiedad</h2>
+              <h2 className="font-display text-xl font-bold text-stone-900 dark:text-white tracking-tight">
+                <TranslatedText text="Descripción de la Propiedad" />
+              </h2>
               <p className="text-stone-600 dark:text-stone-300 leading-relaxed whitespace-pre-line text-sm md:text-base font-medium">
-                {property.description}
+                <TranslatedText text={property.description} isParagraph={true} />
               </p>
             </div>
 
@@ -332,10 +335,10 @@ export default async function PropertyDetailsPage({ params }: { params: Promise<
             <div className="space-y-6 pt-8 border-t border-stone-200/60 dark:border-stone-850">
               <div>
                 <h2 className="font-display text-xl font-bold text-stone-900 dark:text-white tracking-tight">
-                  Características & Amenidades
+                  <TranslatedText text="Características & Amenidades" />
                 </h2>
                 <p className="text-xs font-bold text-stone-400 mt-1">
-                  Especificaciones detalladas de esta propiedad.
+                  <TranslatedText text="Especificaciones detalladas de esta propiedad." />
                 </p>
               </div>
 
@@ -347,7 +350,7 @@ export default async function PropertyDetailsPage({ params }: { params: Promise<
                       className="p-6 rounded-2xl border border-stone-200/60 dark:border-stone-850 bg-stone-50/20 dark:bg-stone-900/10 hover:bg-white dark:hover:bg-card-bg hover:border-primary/20 dark:hover:border-primary/20 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.03)] dark:hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.2)] space-y-3 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
                     >
                       <h3 className="font-display text-xs font-black text-primary dark:text-primary uppercase tracking-widest">
-                        {FEATURE_CATEGORIES[catKey] || catKey}
+                        <TranslatedText text={FEATURE_CATEGORIES[catKey] || catKey} />
                       </h3>
                       <ul className="grid grid-cols-1 gap-2.5">
                         {feats.map((feat) => (
@@ -356,7 +359,7 @@ export default async function PropertyDetailsPage({ params }: { params: Promise<
                             className="flex items-start gap-2.5 text-xs font-bold text-stone-700 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white transition-colors"
                           >
                             <CheckCircle2 className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-500 shrink-0 mt-0.5" />
-                            <span>{feat.label}</span>
+                            <span><TranslatedText text={feat.label} /></span>
                           </li>
                         ))}
                       </ul>
@@ -365,7 +368,7 @@ export default async function PropertyDetailsPage({ params }: { params: Promise<
                 </div>
               ) : (
                 <p className="text-sm font-medium text-stone-400 italic">
-                  No se especificaron características adicionales para esta propiedad.
+                  <TranslatedText text="No se especificaron características adicionales para esta propiedad." />
                 </p>
               )}
             </div>

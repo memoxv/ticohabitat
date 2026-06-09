@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { getTranslations } from '@/lib/translations';
 import { Heart, MessageSquare, CheckCircle2, Sparkles, Phone } from 'lucide-react';
+import TranslatedText from './TranslatedText';
 
 
 export interface PropertyCardProps {
@@ -218,7 +219,7 @@ export default function PropertyCard({ property }: { property: PropertyCardProps
         {/* Title - Linkable */}
         <h3 className="font-sans font-bold text-stone-850 dark:text-stone-100 hover:text-emerald-800 dark:hover:text-emerald-400 transition-colors text-sm line-clamp-1 mb-1.5 leading-snug">
           <Link href={`/propiedad/${property.slug}`}>
-            {property.title}
+            <TranslatedText text={property.title} />
           </Link>
         </h3>
 
