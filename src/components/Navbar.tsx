@@ -94,12 +94,12 @@ export default function Navbar() {
             <button
               onClick={handleLanguageToggle}
               disabled={isPending}
-              className="flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-stone-500 dark:text-stone-450 hover:text-stone-900 dark:hover:text-white bg-stone-100/50 dark:bg-stone-850/20 hover:bg-stone-100 dark:hover:bg-stone-850/50 px-2.5 py-1.5 rounded-lg border border-stone-200/40 dark:border-stone-800/40 transition-all cursor-pointer shadow-sm ml-1 disabled:opacity-80 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider bg-warm-stone hover:bg-stone-200/40 dark:hover:bg-stone-800/20 px-3 py-1.5 rounded-full border border-card-border transition-all cursor-pointer shadow-sm ml-1 disabled:opacity-80 disabled:cursor-not-allowed"
               title={language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
             >
-              <span className={language === 'es' ? 'text-primary font-extrabold' : 'opacity-60'}>ES</span>
-              <span className="text-stone-300 dark:text-stone-700">|</span>
-              <span className={language === 'en' ? 'text-primary font-extrabold' : 'opacity-60'}>EN</span>
+              <span className={language === 'es' ? 'text-primary font-black' : 'text-stone-500 dark:text-stone-400 opacity-50 hover:opacity-100 transition-opacity'}>ES</span>
+              <span className="text-stone-300 dark:text-stone-800/40">|</span>
+              <span className={language === 'en' ? 'text-primary font-black' : 'text-stone-500 dark:text-stone-400 opacity-50 hover:opacity-100 transition-opacity'}>EN</span>
             </button>
 
             {/* Auth / Admin buttons */}
@@ -153,7 +153,7 @@ export default function Navbar() {
             <button
               onClick={handleLanguageToggle}
               disabled={isPending}
-              className="text-[10px] font-black bg-stone-100/60 dark:bg-stone-850/40 border border-stone-200/40 dark:border-stone-800/40 px-2.5 py-1 rounded disabled:opacity-80 disabled:cursor-not-allowed flex items-center gap-1"
+              className="text-[10px] font-black bg-warm-stone border border-card-border px-2.5 py-1 rounded-full disabled:opacity-80 disabled:cursor-not-allowed flex items-center gap-1 text-stone-700 dark:text-stone-200 hover:bg-stone-200/40 dark:hover:bg-stone-800/20 transition-all"
               title={language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
             >
               <span>{language.toUpperCase()}</span>
