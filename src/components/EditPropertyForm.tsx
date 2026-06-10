@@ -60,7 +60,7 @@ interface EditPropertyFormProps {
 
 export default function EditPropertyForm({ property }: EditPropertyFormProps) {
   const router = useRouter();
-  const { showToast, phoneVerified, verifyPhoneInSession } = useApp();
+  const { showToast, phoneVerified, verifyPhoneInSession, language } = useApp();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -324,7 +324,7 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
       } as PropertySubmitData);
       if (res.success) {
         showToast(res.message, 'success');
-        router.push('/dashboard');
+        router.push(`/${language}/dashboard`);
         router.refresh();
       } else {
         showToast(res.message || 'Error al guardar los cambios.', 'error');
@@ -353,7 +353,7 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
           </p>
         </div>
         <Link
-          href="/dashboard"
+          href={`/${language}/dashboard`}
           className="btn-secondary py-2 px-4 text-xs inline-flex items-center gap-1.5 self-start sm:self-center"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -741,7 +741,7 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
             </button>
 
             <Link
-              href="/dashboard"
+              href={`/${language}/dashboard`}
               className="w-full btn-secondary py-3.5 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 text-stone-450 dark:text-stone-300"
             >
               <span>Cancelar</span>

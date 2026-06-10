@@ -245,7 +245,7 @@ export function AppProvider({ children, locale: propLocale }: { children: React.
     showToast('Sesión cerrada correctamente', 'info');
     
     // Redirect to home page immediately to clear caches and ensure session-private routes are left cleanly
-    window.location.replace('/');
+    window.location.replace(`/${language}`);
   };
 
   const toggleFavorite = (propertyId: string) => {

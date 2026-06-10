@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useTransition, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
@@ -19,7 +19,7 @@ export default function Navbar() {
   const { language, setLanguage, user, logout, favorites } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isPendingLanguage, setIsPendingLanguage] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const targetLangRef = React.useRef<'es' | 'en' | null>(null);
   const router = useRouter();
   const t = getTranslations(language);
 
@@ -28,6 +28,7 @@ export default function Navbar() {
     
     const nextLang = language === 'es' ? 'en' : 'es';
     setIsPendingLanguage(true);
+    targetLangRef.current = nextLang;
     
     const pathname = window.location.pathname;
     const search = window.location.search;
@@ -40,18 +41,20 @@ export default function Navbar() {
     }
     const nextPathname = segments.join('/');
 
-    // Show loader for exactly 1 second, then navigate client-side and hide loader
+    // Wait 1 second before pushing to Next.js router to ensure a clean visual loading transition
     setTimeout(() => {
-      setLanguage(nextLang);
-      router.push(`${nextPathname}${search}`);
       setMobileMenuOpen(false);
-      
-      // Delay briefly to allow client-side page rendering before hiding loader
-      setTimeout(() => {
-        setIsPendingLanguage(false);
-      }, 300);
+      router.push(`${nextPathname}${search}`);
     }, 1000);
   };
+
+  // Sync / dismiss loading overlay only when the actual context language has updated to match the target language
+  useEffect(() => {
+    if (isPendingLanguage && language === targetLangRef.current) {
+      setIsPendingLanguage(false);
+      targetLangRef.current = null;
+    }
+  }, [language, isPendingLanguage]);
 
   return (
     <>
@@ -116,7 +119,7 @@ export default function Navbar() {
             {/* Language Switcher */}
             <button
               onClick={handleLanguageToggle}
-              disabled={isPending || isPendingLanguage}
+              disabled={isPendingLanguage}
               className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider bg-warm-stone hover:bg-stone-200/40 dark:hover:bg-stone-800/20 px-3 py-1.5 rounded-full border border-card-border transition-all cursor-pointer shadow-sm ml-1 disabled:opacity-80 disabled:cursor-not-allowed"
               title={language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
             >
@@ -175,7 +178,7 @@ export default function Navbar() {
             {/* Mobile Language Switcher (Quick Toggle Icon) */}
             <button
               onClick={handleLanguageToggle}
-              disabled={isPending || isPendingLanguage}
+              disabled={isPendingLanguage}
               className="text-[10px] font-black bg-warm-stone border border-card-border px-2.5 py-1 rounded-full disabled:opacity-80 disabled:cursor-not-allowed flex items-center gap-1 text-stone-700 dark:text-stone-200 hover:bg-stone-200/40 dark:hover:bg-stone-800/20 transition-all"
               title={language === 'es' ? 'Switch to English' : 'Cambiar a Español'}
             >
@@ -232,7 +235,7 @@ export default function Navbar() {
               </span>
               <button
                 onClick={handleLanguageToggle}
-                disabled={isPending || isPendingLanguage}
+                disabled={isPendingLanguage}
                 className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider bg-warm-stone hover:bg-stone-200/40 dark:hover:bg-stone-800/20 px-3.5 py-1.5 rounded-full border border-card-border transition-all cursor-pointer shadow-sm disabled:opacity-80 disabled:cursor-not-allowed"
               >
                 <span className={language === 'es' ? 'text-primary font-black' : 'text-stone-500 dark:text-stone-400 opacity-50'}>ES</span>
@@ -298,7 +301,7 @@ export default function Navbar() {
       </nav>
 
       {/* Premium Full-Screen Loading Overlay to block interaction & show loader */}
-      {(isPending || isPendingLanguage) && (
+      {isPendingLanguage && (
         <div className="fixed inset-0 w-screen h-screen z-[9999] flex flex-col items-center justify-center bg-stone-900/60 dark:bg-stone-950/75 backdrop-blur-[3px] pointer-events-auto select-none transition-all duration-300">
           <div className="flex flex-col items-center gap-4.5 p-7 rounded-2xl bg-white dark:bg-stone-900 border border-stone-250/20 dark:border-stone-800/60 shadow-xl max-w-xs w-[85%] text-center animate-scaleIn">
             <div className="relative flex items-center justify-center">

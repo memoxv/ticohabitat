@@ -44,7 +44,7 @@ export default function DestacarClient({
   maxFeatured,
   hasFreeSlot,
 }: DestacarClientProps) {
-  const { showToast } = useApp();
+  const { showToast, language } = useApp();
   const router = useRouter();
   const [duration, setDuration] = useState<7 | 15 | 30>(7);
   const [receiptBase64, setReceiptBase64] = useState('');
@@ -182,7 +182,7 @@ export default function DestacarClient({
         </div>
 
         <Link
-          href="/dashboard"
+          href={`/${language}/dashboard`}
           className="btn-primary py-3 px-6 text-xs inline-block font-bold uppercase tracking-wider shadow-sm cursor-pointer"
         >
           Volver a Mi Panel

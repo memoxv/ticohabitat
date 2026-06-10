@@ -390,10 +390,10 @@ export default function PropertySearchPage({
             {/* Quick Location Chips Grid */}
             <div className="grid grid-cols-2 gap-2">
               {[
-                { name: 'San José', path: `/${type === 'buy' ? 'comprar' : 'alquilar'}/san-jose` },
-                { name: 'Heredia', path: `/${type === 'buy' ? 'comprar' : 'alquilar'}/heredia` },
-                { name: 'Alajuela', path: `/${type === 'buy' ? 'comprar' : 'alquilar'}/alajuela` },
-                { name: 'Cartago', path: `/${type === 'buy' ? 'comprar' : 'alquilar'}/cartago` },
+                { name: 'San José', path: `/${language}/${type === 'buy' ? 'comprar' : 'alquilar'}/san-jose` },
+                { name: 'Heredia', path: `/${language}/${type === 'buy' ? 'comprar' : 'alquilar'}/heredia` },
+                { name: 'Alajuela', path: `/${language}/${type === 'buy' ? 'comprar' : 'alquilar'}/alajuela` },
+                { name: 'Cartago', path: `/${language}/${type === 'buy' ? 'comprar' : 'alquilar'}/cartago` },
               ].map((loc) => (
                 <button
                   key={loc.name}
