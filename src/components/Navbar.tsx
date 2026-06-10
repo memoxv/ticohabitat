@@ -23,32 +23,11 @@ export default function Navbar() {
   const router = useRouter();
   const t = getTranslations(language);
 
-  // Keep loading overlay active on new page load if we just changed languages
-  useEffect(() => {
-    try {
-      const changing = sessionStorage.getItem('language_changing');
-      if (changing === 'true') {
-        setIsPendingLanguage(true);
-        const timer = setTimeout(() => {
-          setIsPendingLanguage(false);
-          sessionStorage.removeItem('language_changing');
-        }, 1000);
-        return () => clearTimeout(timer);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }, []);
-
   const handleLanguageToggle = () => {
     if (isPendingLanguage) return;
     
     const nextLang = language === 'es' ? 'en' : 'es';
     setIsPendingLanguage(true);
-    
-    try {
-      sessionStorage.setItem('language_changing', 'true');
-    } catch (e) {}
     
     const pathname = window.location.pathname;
     const search = window.location.search;
@@ -61,9 +40,16 @@ export default function Navbar() {
     }
     const nextPathname = segments.join('/');
 
+    // Show loader for exactly 1 second, then navigate client-side and hide loader
     setTimeout(() => {
       setLanguage(nextLang);
-      window.location.href = `${nextPathname}${search}`;
+      router.push(`${nextPathname}${search}`);
+      setMobileMenuOpen(false);
+      
+      // Delay briefly to allow client-side page rendering before hiding loader
+      setTimeout(() => {
+        setIsPendingLanguage(false);
+      }, 300);
     }, 1000);
   };
 

@@ -75,9 +75,8 @@ export function AppProvider({ children, locale: propLocale }: { children: React.
     }
   };
 
-  // Load from localStorage on mount
+  // Sync language state with URL pathname changes (crucial for client-side routing)
   useEffect(() => {
-    // 0. Language: sync state with current route pathname
     if (pathname) {
       const pathSegment = pathname.split('/')[1];
       if (pathSegment === 'en' || pathSegment === 'es') {
@@ -85,8 +84,10 @@ export function AppProvider({ children, locale: propLocale }: { children: React.
         document.cookie = `language=${pathSegment}; path=/; max-age=31536000; SameSite=Lax`;
       }
     }
+  }, [pathname]);
 
-
+  // Load from localStorage on mount
+  useEffect(() => {
     // 1. Theme (Forced dark mode always)
     setTheme('dark');
     document.documentElement.setAttribute('data-theme', 'dark');
