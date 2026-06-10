@@ -75,7 +75,7 @@ export default function PropertyDetailsClient({ property }: PropertyDetailsClien
       ? `${property.province}, ${property.canton}` 
       : property.province;
 
-    const text = `👋 *¡Hola!*\n\nVi tu anuncio en *TicoHabitat* 🏡\n👉 *${propertyTypeLabel}:* ${property.title}\n💰 *Precio:* ${priceText}\n📍 *Ubicación:* ${locationText}\n\n¿Sigue disponible para coordinar una visita?\n\n🔗 *Enlace:* https://www.ticohabitat.com/propiedad/${property.slug}`;
+    const text = `👋 *¡Hola!*\n\nVi tu anuncio en *TicoHabitat* 🏡\n👉 *${propertyTypeLabel}:* ${property.title}\n💰 *Precio:* ${priceText}\n📍 *Ubicación:* ${locationText}\n\n¿Sigue disponible para coordinar una visita?\n\n🔗 *Enlace:* https://ticohabitat.com/propiedad/${property.slug}`;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const waUrl = isMobile 
       ? `whatsapp://send?phone=506${cleanPhone}&text=${encodeURIComponent(text)}`

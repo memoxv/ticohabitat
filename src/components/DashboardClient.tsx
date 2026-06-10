@@ -286,7 +286,7 @@ export default function DashboardClient({ initialProperties, userSession }: Dash
                   </div>
                   <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-2.5">{t.dashboard.planBasicDesc}</p>
                   <Link
-                    href="/dashboard/planes"
+                    href={`/${language}/dashboard/planes`}
                     className="w-full text-center block bg-primary/10 hover:bg-primary/20 text-primary dark:text-primary-light py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all"
                   >
                     {t.dashboard.upgradePlan}
@@ -590,7 +590,7 @@ export default function DashboardClient({ initialProperties, userSession }: Dash
                   {t.dashboard.noListingsDesc2}
                 </p>
                 <Link
-                  href="/publicar"
+                  href={`/${language}/publicar`}
                   className="btn-primary py-2.5 px-5 text-xs shadow-sm"
                 >
                   {t.dashboard.noListingsBtn}
@@ -673,15 +673,15 @@ export default function DashboardClient({ initialProperties, userSession }: Dash
                         <div className="mt-auto pt-4 border-t border-stone-100 dark:border-stone-850 flex flex-wrap items-center justify-between gap-3">
                           <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5">
                             <Link
-                              href={`/propiedad/${prop.slug}`}
-                              className="inline-flex items-center gap-1 text-[10px] font-black text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 uppercase tracking-wider"
+                              href={`/${language}/propiedad/${prop.slug}`}
+                              className="inline-flex items-center gap-1 text-[10px] font-black text-stone-500 hover:text-stone-850 dark:hover:text-stone-200 uppercase tracking-wider"
                             >
                               <ExternalLink className="h-3.5 w-3.5" />
                               <span>{t.dashboard.actionView}</span>
                             </Link>
 
                             <Link
-                              href={`/dashboard/editar/${prop.id}`}
+                              href={`/${language}/dashboard/editar/${prop.id}`}
                               className="inline-flex items-center gap-1 text-[10px] font-black text-stone-500 hover:text-stone-855 dark:hover:text-stone-200 uppercase tracking-wider"
                               title="Editar anuncio"
                             >
@@ -714,7 +714,7 @@ export default function DashboardClient({ initialProperties, userSession }: Dash
                             {/* Destacar CTA */}
                             {!prop.featured && !prop.isFeaturedPending && isActive && (
                               <Link
-                                  href={`/dashboard/destacar/${prop.id}`}
+                                href={`/${language}/dashboard/destacar/${prop.id}`}
                                 className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-600 hover:text-amber-700 dark:text-amber-500 dark:hover:text-amber-400 hover:scale-102 transition-transform uppercase tracking-wider"
                               >
                                 <Sparkles className="h-3.5 w-3.5 animate-pulse text-amber-500" />
@@ -766,7 +766,7 @@ export default function DashboardClient({ initialProperties, userSession }: Dash
                   {t.dashboard.noFavoritesDesc}
                 </p>
                 <Link
-                  href="/comprar"
+                  href={`/${language}/comprar`}
                   className="btn-primary py-2.5 px-5 text-xs shadow-sm inline-flex items-center gap-1.5"
                 >
                   <Compass className="h-4.5 w-4.5" />

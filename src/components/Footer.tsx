@@ -15,7 +15,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="sm:col-span-2 space-y-4">
-            <Link href="/" className="flex items-center gap-2 text-white">
+            <Link href={`/${language}`} className="flex items-center gap-2 text-white">
               <img
                 src="/logo-icon.png"
                 alt="TicoHabitat Logo"
@@ -58,16 +58,16 @@ export default function Footer() {
             <h3 className="font-display text-xs font-bold text-stone-300 tracking-widest uppercase mb-4">{t.footer.keyProvinces}</h3>
             <ul className="space-y-2.5 text-xs font-medium">
               <li>
-                <Link href="/comprar/san-jose" className="hover:text-white transition-colors">{t.footer.propSanJose}</Link>
+                <Link href={`/${language}/comprar/san-jose`} className="hover:text-white transition-colors">{t.footer.propSanJose}</Link>
               </li>
               <li>
-                <Link href="/alquilar/alajuela" className="hover:text-white transition-colors">{t.footer.rentAlajuela}</Link>
+                <Link href={`/${language}/alquilar/alajuela`} className="hover:text-white transition-colors">{t.footer.rentAlajuela}</Link>
               </li>
               <li>
-                <Link href="/comprar/guanacaste" className="hover:text-white transition-colors">{t.footer.beachGuanacaste}</Link>
+                <Link href={`/${language}/comprar/guanacaste`} className="hover:text-white transition-colors">{t.footer.beachGuanacaste}</Link>
               </li>
               <li>
-                <Link href="/alquilar/heredia" className="hover:text-white transition-colors">{t.footer.aptHeredia}</Link>
+                <Link href={`/${language}/alquilar/heredia`} className="hover:text-white transition-colors">{t.footer.aptHeredia}</Link>
               </li>
             </ul>
           </div>
@@ -77,16 +77,16 @@ export default function Footer() {
             <h3 className="font-display text-xs font-bold text-stone-300 tracking-widest uppercase mb-4">{t.footer.platform}</h3>
             <ul className="space-y-2.5 text-xs font-medium">
               <li>
-                <Link href="/publicar" className="hover:text-white transition-colors">{t.common.publish}</Link>
+                <Link href={`/${language}/publicar`} className="hover:text-white transition-colors">{t.common.publish}</Link>
               </li>
               <li>
                 <a href="https://wa.me/50660677055" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">{t.footer.whatsappSupport}</a>
               </li>
               <li>
-                <Link href="/faq" className="hover:text-white transition-colors">{t.footer.faq}</Link>
+                <Link href={`/${language}/faq`} className="hover:text-white transition-colors">{t.footer.faq}</Link>
               </li>
               <li>
-                <Link href="/terminos" className="hover:text-white transition-colors">{t.footer.terms}</Link>
+                <Link href={`/${language}/terminos`} className="hover:text-white transition-colors">{t.footer.terms}</Link>
               </li>
             </ul>
           </div>

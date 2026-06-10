@@ -43,3 +43,6 @@ next-env.d.ts
 # scratch folder for debug scripts
 /scratch
 
+# android builds & temp files
+temp_extracted/
+*.apk

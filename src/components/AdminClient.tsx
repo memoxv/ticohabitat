@@ -350,7 +350,7 @@ export default function AdminClient({
                                           className="h-10 w-10 object-cover rounded-lg border border-card-border shrink-0"
                                         />
                                       )}
-                                      <Link href={`/propiedad/${prop.slug}`} className="hover:text-primary hover:underline line-clamp-1 font-bold text-stone-900 dark:text-stone-100">
+                                      <Link href={`/${language}/propiedad/${prop.slug}`} className="hover:text-primary hover:underline line-clamp-1 font-bold text-stone-900 dark:text-stone-100">
                                         {prop.title}
                                       </Link>
                                     </div>
@@ -510,7 +510,7 @@ export default function AdminClient({
                             />
                           )}
                           <div className="min-w-0">
-                            <Link href={`/propiedad/${prop.slug}`} className="font-bold text-sm text-stone-900 dark:text-stone-100 hover:text-primary line-clamp-1">
+                            <Link href={`/${language}/propiedad/${prop.slug}`} className="font-bold text-sm text-stone-900 dark:text-stone-100 hover:text-primary line-clamp-1">
                               {prop.title}
                             </Link>
                             <p className="text-[9px] font-bold font-mono text-stone-400 mt-0.5">
@@ -531,7 +531,7 @@ export default function AdminClient({
                           </span>
 
                           <Link
-                            href={`/propiedad/${prop.slug}`}
+                            href={`/${language}/propiedad/${prop.slug}`}
                             className="p-1.5 rounded bg-stone-50 dark:bg-stone-800 text-stone-400 hover:text-stone-600 transition-colors cursor-pointer"
                             title={language === 'en' ? 'Inspect' : 'Inspeccionar'}
                           >
@@ -583,7 +583,7 @@ export default function AdminClient({
                           <p className="text-[9px] font-bold text-stone-400 mt-1 uppercase font-mono">Email: {prop.userEmail}</p>
                         </div>
                         <div className="flex items-center gap-3 justify-end border-t border-stone-100 dark:border-stone-850 pt-4 mt-2">
-                          <Link href={`/propiedad/${prop.slug}`} className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-stone-400 hover:text-stone-655 mr-auto">
+                          <Link href={`/${language}/propiedad/${prop.slug}`} className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-stone-400 hover:text-stone-655 mr-auto">
                             <ExternalLink className="h-3.5 w-3.5" /><span>{language === 'en' ? 'Inspect' : 'Inspeccionar'}</span>
                           </Link>
                           <button onClick={() => handleModerate(prop.id, 'reject')} className="btn-danger py-1.5 px-3 text-[10px] uppercase tracking-wider flex items-center gap-1 cursor-pointer">
@@ -619,8 +619,8 @@ export default function AdminClient({
                       <span className="inline-flex rounded bg-red-500/10 px-2 py-0.5 text-[9px] font-bold text-red-700 mb-2 uppercase tracking-wider">
                         {language === 'en' ? 'Report:' : 'Reporte:'} {report.reason}
                       </span>
-                      <h3 className="font-display font-bold text-stone-800 dark:text-stone-100">
-                        {language === 'en' ? 'Objected Listing:' : 'Anuncio objetado:'} <Link href={`/propiedad/${report.property.slug}`} className="text-primary hover:underline font-extrabold">{report.property.title}</Link>
+                      <h3 className="font-display font-bold text-stone-880 dark:text-stone-100">
+                        {language === 'en' ? 'Objected Listing:' : 'Anuncio objetado:'} <Link href={`/${language}/propiedad/${report.property.slug}`} className="text-primary hover:underline font-extrabold">{report.property.title}</Link>
                       </h3>
                       {report.user && <p className="text-[9px] font-bold font-mono text-stone-455 mt-1 uppercase">{language === 'en' ? 'Reported by:' : 'Reportado por:'} {report.user.email}</p>}
                     </div>

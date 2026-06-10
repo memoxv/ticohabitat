@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 
 export interface UserSession {
   userId: string;
@@ -38,13 +39,27 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export function AppProvider({ children }: { children: React.ReactNode }) {
+export function AppProvider({ children, locale: propLocale }: { children: React.ReactNode; locale?: 'es' | 'en' }) {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [user, setUser] = useState<UserSession | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [phoneVerified, setPhoneVerified] = useState<string | null>(null);
-  const [language, setLanguageState] = useState<'es' | 'en'>('es');
+  const pathname = usePathname();
+  const [language, setLanguageState] = useState<'es' | 'en'>(() => {
+    if (propLocale) return propLocale;
+    if (typeof window !== 'undefined') {
+      const pathSegment = window.location.pathname.split('/')[1];
+      if (pathSegment === 'en' || pathSegment === 'es') {
+        return pathSegment;
+      }
+      const match = document.cookie.match(/language=(es|en)/);
+      if (match && (match[1] === 'es' || match[1] === 'en')) {
+        return match[1] as 'es' | 'en';
+      }
+    }
+    return 'es';
+  });
 
   // Helper to sync user favorites from server
   const syncUserFavorites = async () => {
@@ -62,16 +77,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // Load from localStorage on mount
   useEffect(() => {
-    // 0. Language
-    const savedLang = localStorage.getItem('language') as 'es' | 'en';
-    if (savedLang === 'es' || savedLang === 'en') {
-      setLanguageState(savedLang);
-    } else {
-      const match = document.cookie.match(/language=(es|en)/);
-      if (match && (match[1] === 'es' || match[1] === 'en')) {
-        setLanguageState(match[1] as 'es' | 'en');
+    // 0. Language: sync state with current route pathname
+    if (pathname) {
+      const pathSegment = pathname.split('/')[1];
+      if (pathSegment === 'en' || pathSegment === 'es') {
+        setLanguageState(pathSegment);
+        document.cookie = `language=${pathSegment}; path=/; max-age=31536000; SameSite=Lax`;
       }
     }
+
 
     // 1. Theme (Forced dark mode always)
     setTheme('dark');
@@ -137,7 +151,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const setLanguage = (lang: 'es' | 'en') => {
     setLanguageState(lang);
-    localStorage.setItem('language', lang);
     document.cookie = `language=${lang}; path=/; max-age=31536000; SameSite=Lax`;
   };
 

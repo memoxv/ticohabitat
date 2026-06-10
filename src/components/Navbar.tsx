@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useTransition } from 'react';
+import React, { useState, useTransition, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
@@ -23,17 +23,47 @@ export default function Navbar() {
   const router = useRouter();
   const t = getTranslations(language);
 
+  // Keep loading overlay active on new page load if we just changed languages
+  useEffect(() => {
+    try {
+      const changing = sessionStorage.getItem('language_changing');
+      if (changing === 'true') {
+        setIsPendingLanguage(true);
+        const timer = setTimeout(() => {
+          setIsPendingLanguage(false);
+          sessionStorage.removeItem('language_changing');
+        }, 1000);
+        return () => clearTimeout(timer);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
   const handleLanguageToggle = () => {
     if (isPendingLanguage) return;
     
     const nextLang = language === 'es' ? 'en' : 'es';
     setIsPendingLanguage(true);
     
-    // Delay the state switch and browser reload by 1 second
-    // to show the loading screen and completely block button spamming
+    try {
+      sessionStorage.setItem('language_changing', 'true');
+    } catch (e) {}
+    
+    const pathname = window.location.pathname;
+    const search = window.location.search;
+    
+    const segments = pathname.split('/');
+    if (segments[1] === 'es' || segments[1] === 'en') {
+      segments[1] = nextLang;
+    } else {
+      segments.splice(1, 0, nextLang);
+    }
+    const nextPathname = segments.join('/');
+
     setTimeout(() => {
       setLanguage(nextLang);
-      window.location.reload();
+      window.location.href = `${nextPathname}${search}`;
     }, 1000);
   };
 
@@ -46,7 +76,7 @@ export default function Navbar() {
         <div className="flex h-14 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center gap-2.5 group">
+            <Link href={`/${language}`} className="flex items-center gap-2.5 group">
               <img
                 src="/logo-icon.png"
                 alt="TicoHabitat Logo"
@@ -61,13 +91,13 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-7">
             <Link
-              href="/comprar"
+              href={`/${language}/comprar`}
               className="text-sm font-bold text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white transition-colors"
             >
               {t.common.buy}
             </Link>
             <Link
-              href="/alquilar"
+              href={`/${language}/alquilar`}
               className="text-sm font-bold text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white transition-colors"
             >
               {t.common.rent}
@@ -75,7 +105,7 @@ export default function Navbar() {
             
             {/* Favorites Icon with Badge */}
             <Link 
-              href="/dashboard"
+              href={`/${language}/dashboard`}
               className="relative p-2 rounded-lg text-stone-500 dark:text-stone-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-stone-50 dark:hover:bg-stone-850/50 transition-colors"
               title={t.navbar.favorites}
             >
@@ -90,7 +120,7 @@ export default function Navbar() {
 
             {/* CTA: Publish - Stood out beautifully */}
             <Link
-              href="/publicar"
+              href={`/${language}/publicar`}
               className="btn-primary py-2 px-4.5 text-xs inline-flex items-center gap-1.5 transition-all shadow-sm"
             >
               <PlusCircle className="h-3.5 w-3.5" />
@@ -113,7 +143,7 @@ export default function Navbar() {
             {user ? (
               <div className="flex items-center gap-4 border-l border-stone-200 dark:border-stone-800 pl-5">
                 <Link
-                  href="/dashboard"
+                  href={`/${language}/dashboard`}
                   className="flex items-center gap-1.5 text-sm font-bold text-stone-700 dark:text-stone-200 hover:text-primary transition-colors"
                 >
                   <User className="h-4 w-4 text-stone-450" />
@@ -121,7 +151,7 @@ export default function Navbar() {
                 </Link>
                 {user.role === 'ADMIN' && (
                   <Link
-                    href="/admin"
+                    href={`/${language}/admin`}
                     className="flex items-center gap-1 text-xs font-black text-accent hover:underline pl-1"
                   >
                     <ShieldCheck className="h-3.5 w-3.5" />
@@ -139,13 +169,13 @@ export default function Navbar() {
             ) : (
               <div className="flex items-center gap-4 border-l border-stone-200 dark:border-stone-800 pl-5">
                 <Link
-                  href="/login"
+                  href={`/${language}/login`}
                   className="text-sm font-bold text-stone-600 dark:text-stone-300 hover:text-stone-950 dark:hover:text-white transition-colors"
                 >
                   {t.common.login}
                 </Link>
                 <Link
-                  href="/registro"
+                  href={`/${language}/registro`}
                   className="btn-secondary py-1.5 px-3.5 text-xs transition-colors"
                 >
                   {t.common.register}
@@ -180,21 +210,21 @@ export default function Navbar() {
         <div className="md:hidden bg-card-bg border-t border-card-border/30 pb-5 pt-3 px-1 mt-1 animate-fadeIn">
           <div className="flex flex-col gap-4">
             <Link
-              href="/comprar"
+              href={`/${language}/comprar`}
               onClick={() => setMobileMenuOpen(false)}
               className="text-sm font-bold text-stone-700 dark:text-stone-200 hover:text-stone-950"
             >
               {t.common.buy}
             </Link>
             <Link
-              href="/alquilar"
+              href={`/${language}/alquilar`}
               onClick={() => setMobileMenuOpen(false)}
               className="text-sm font-bold text-stone-700 dark:text-stone-200 hover:text-stone-950"
             >
               {t.common.rent}
             </Link>
             <Link
-              href="/dashboard"
+              href={`/${language}/dashboard`}
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center gap-2 text-sm font-bold text-stone-700 dark:text-stone-200 hover:text-stone-950"
             >
@@ -202,19 +232,35 @@ export default function Navbar() {
               <span>{t.navbar.favorites} ({favorites.length})</span>
             </Link>
             <Link
-              href="/publicar"
+              href={`/${language}/publicar`}
               onClick={() => setMobileMenuOpen(false)}
               className="btn-primary py-2.5 w-full flex items-center justify-center gap-2 shadow-sm"
             >
               <PlusCircle className="h-4 w-4" />
               <span>{t.common.publish}</span>
             </Link>
+            
+            <div className="flex items-center justify-between py-2 px-1 border-t border-card-border/30 mt-1">
+              <span className="text-xs font-bold text-stone-500 dark:text-stone-400">
+                {language === 'es' ? 'Idioma de la plataforma' : 'Platform language'}
+              </span>
+              <button
+                onClick={handleLanguageToggle}
+                disabled={isPending || isPendingLanguage}
+                className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider bg-warm-stone hover:bg-stone-200/40 dark:hover:bg-stone-800/20 px-3.5 py-1.5 rounded-full border border-card-border transition-all cursor-pointer shadow-sm disabled:opacity-80 disabled:cursor-not-allowed"
+              >
+                <span className={language === 'es' ? 'text-primary font-black' : 'text-stone-500 dark:text-stone-400 opacity-50'}>ES</span>
+                <span className="text-stone-300 dark:text-stone-800/40">|</span>
+                <span className={language === 'en' ? 'text-primary font-black' : 'text-stone-500 dark:text-stone-400 opacity-50'}>EN</span>
+              </button>
+            </div>
+
             <hr className="border-card-border/50 my-1" />
             
             {user ? (
               <div className="flex flex-col gap-3">
                 <Link
-                  href="/dashboard"
+                  href={`/${language}/dashboard`}
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center gap-2 text-sm font-bold text-stone-700 dark:text-stone-200"
                 >
@@ -223,7 +269,7 @@ export default function Navbar() {
                 </Link>
                 {user.role === 'ADMIN' && (
                   <Link
-                    href="/admin"
+                    href={`/${language}/admin`}
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center gap-2 text-sm font-bold text-accent"
                   >
@@ -245,14 +291,14 @@ export default function Navbar() {
             ) : (
               <div className="grid grid-cols-2 gap-3">
                 <Link
-                  href="/login"
+                  href={`/${language}/login`}
                   onClick={() => setMobileMenuOpen(false)}
                   className="btn-secondary py-2.5 text-center flex items-center justify-center"
                 >
                   {t.common.login}
                 </Link>
                 <Link
-                  href="/registro"
+                  href={`/${language}/registro`}
                   onClick={() => setMobileMenuOpen(false)}
                   className="btn-primary py-2.5 text-center flex items-center justify-center"
                 >

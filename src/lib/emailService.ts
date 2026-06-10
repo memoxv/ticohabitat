@@ -214,7 +214,7 @@ export class EmailService {
   <div class="wrapper">
     <div class="container">
       <div class="header">
-        <img src="https://www.ticohabitat.com/logo-icon.png" alt="TicoHabitat" class="logo-img" onerror="this.style.display='none'">
+        <img src="https://ticohabitat.com/logo-icon.png" alt="TicoHabitat" class="logo-img" onerror="this.style.display='none'">
         <div class="brand-title">Tico<span class="brand-accent">Habitat</span></div>
       </div>
       <div class="content">

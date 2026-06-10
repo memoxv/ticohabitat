@@ -124,11 +124,11 @@ export default function PropertyCard({ property }: { property: PropertyCardProps
     <div className="group relative flex flex-col bg-card-bg rounded-3xl overflow-hidden hover-lift shadow-[0_12px_30px_-10px_rgba(15,22,19,0.02)] transition-all duration-350 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
       {/* Property Image Cover - uses div+onClick to avoid nested <a> from tooltip */}
       <div
-        onClick={() => router.push(`/propiedad/${property.slug}`)}
+        onClick={() => router.push(`/${language}/propiedad/${property.slug}`)}
         className="relative aspect-[4/3] w-full overflow-hidden bg-stone-100 dark:bg-stone-850 block rounded-t-3xl cursor-pointer"
         role="link"
         tabIndex={0}
-        onKeyDown={(e) => { if (e.key === 'Enter') router.push(`/propiedad/${property.slug}`); }}
+        onKeyDown={(e) => { if (e.key === 'Enter') router.push(`/${language}/propiedad/${property.slug}`); }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -218,7 +218,7 @@ export default function PropertyCard({ property }: { property: PropertyCardProps
 
         {/* Title - Linkable */}
         <h3 className="font-sans font-bold text-stone-850 dark:text-stone-100 hover:text-emerald-800 dark:hover:text-emerald-400 transition-colors text-sm line-clamp-1 mb-1.5 leading-snug">
-          <Link href={`/propiedad/${property.slug}`}>
+          <Link href={`/${language}/propiedad/${property.slug}`}>
             <TranslatedText text={property.title} />
           </Link>
         </h3>
