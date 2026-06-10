@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { getTranslations } from '@/lib/translations';
 import {
@@ -19,8 +18,6 @@ export default function Navbar() {
   const { language, setLanguage, user, logout, favorites } = useApp();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isPendingLanguage, setIsPendingLanguage] = useState(false);
-  const targetLangRef = React.useRef<'es' | 'en' | null>(null);
-  const router = useRouter();
   const t = getTranslations(language);
 
   const handleLanguageToggle = () => {
@@ -28,7 +25,6 @@ export default function Navbar() {
     
     const nextLang = language === 'es' ? 'en' : 'es';
     setIsPendingLanguage(true);
-    targetLangRef.current = nextLang;
     
     const pathname = window.location.pathname;
     const search = window.location.search;
@@ -41,20 +37,13 @@ export default function Navbar() {
     }
     const nextPathname = segments.join('/');
 
-    // Wait 1 second before pushing to Next.js router to ensure a clean visual loading transition
+    // Wait 1 second before hard redirecting to ensure a clean visual loading transition
     setTimeout(() => {
+      setLanguage(nextLang);
       setMobileMenuOpen(false);
-      router.push(`${nextPathname}${search}`);
+      window.location.href = `${nextPathname}${search}`;
     }, 1000);
   };
-
-  // Sync / dismiss loading overlay only when the actual context language has updated to match the target language
-  useEffect(() => {
-    if (isPendingLanguage && language === targetLangRef.current) {
-      setIsPendingLanguage(false);
-      targetLangRef.current = null;
-    }
-  }, [language, isPendingLanguage]);
 
   return (
     <>
